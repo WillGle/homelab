@@ -1,0 +1,259 @@
+<mxfile host="app.diagrams.net">
+    <diagram id="homelab-architecture" name="homelab-architecture">
+        <mxGraphModel dx="1000" dy="800" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1200" pageHeight="900" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                
+                <!-- TITLE -->
+                <mxCell id="title" value="&lt;b&gt;HOMELAB PRIVATE CLOUD&lt;/b&gt; — Physical &amp;amp; Virtual Architecture Overview (2026-07-08)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="10" width="900" height="30" as="geometry"/>
+                </mxCell>
+                
+                <!-- CONTEXT STRIP -->
+                <mxCell id="context" value="&lt;b&gt;Scope &amp;amp; Context:&lt;/b&gt; 2-Node Proxmox VE Cluster (homelab) · Flat LAN (192.168.1.0/24) · ZFS-backed storage &amp;amp; local VM pools · Automated via Ansible, Terraform, and Cloud-init" style="rounded=1;whiteSpace=wrap;html=1;align=left;spacing=8;fillColor=#FAFAFA;strokeColor=#969696;fontColor=#000000;fontSize=11;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="50" width="1120" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- NETWORK & MANAGEMENT GROUP -->
+                <mxCell id="netGroup" value="&lt;b&gt;Network &amp;amp; Management&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacing=6;fillColor=none;strokeColor=#6c8ebf;fontColor=#000000;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="110" width="1120" height="110" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="internet" value="&lt;b&gt;Internet&lt;/b&gt;&lt;br&gt;ISP WAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="150" width="120" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="router" value="&lt;b&gt;router-01&lt;/b&gt;&lt;br&gt;192.168.1.1 · Gateway" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="150" width="150" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="switch" value="&lt;b&gt;switch-01&lt;/b&gt;&lt;br&gt;TP-Link TL-SG108E (8-port)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="150" width="160" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="admin" value="&lt;b&gt;Admin Workstation&lt;/b&gt;&lt;br&gt;SSH · Web UI · Git" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="890" y="150" width="170" height="50" as="geometry"/>
+                </mxCell>
+                
+                <!-- PROXMOX VE CLUSTER GROUP (height adjusted to 450 to enclose taller hosts) -->
+                <mxCell id="clusterGroup" value="&lt;b&gt;Proxmox VE Cluster&lt;/b&gt; — homelab" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacing=6;fillColor=none;strokeColor=#666666;fontSize=13;fontColor=#000000;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="270" width="1120" height="510" as="geometry"/>
+                </mxCell>
+                
+                <!-- NODE 1: PVE01-PC (expanded height to 450 and width to 480 for spaciousness) -->
+                <mxCell id="pve01" value="&lt;b&gt;pve01-pc&lt;/b&gt; — Compute &amp;amp; Storage Host&lt;br&gt;Ryzen 5 5600X · 16GB DDR4 · 192.168.1.10" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacing=6;fillColor=none;strokeColor=#666666;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="310" width="480" height="450" as="geometry"/>
+                </mxCell>
+                
+                <!-- PVE01 NETWORKING BLOCKS (TOP - starting at y=380) -->
+                <mxCell id="pve01NIC" value="&lt;b&gt;eno1&lt;/b&gt; (NIC)&lt;br/&gt;Physical 1Gbps" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="380" width="90" height="40" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve01Bridge" value="&lt;b&gt;vmbr0&lt;/b&gt; (Linux Bridge)&lt;br/&gt;Virtual Switch" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="380" width="180" height="40" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="pve01VPN" value="&lt;b&gt;tailscale0&lt;/b&gt; (VPN)&lt;br/&gt;100.64.1.10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#b19ffb;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="380" width="110" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- PVE01 VIRTUAL MACHINES (MIDDLE - shifted to y=475) -->
+                <mxCell id="nas01" value="&lt;b&gt;nas-01&lt;/b&gt; (VM)&lt;br&gt;192.168.1.20 · NFS / SMB Share&lt;br&gt;Resources: 2 vCPU, 4GB RAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=11;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="475" width="190" height="70" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="mlcompute01" value="&lt;b&gt;ml-compute-01&lt;/b&gt; (VM)&lt;br&gt;192.168.1.41 · ML &amp;amp; Thesis Compute&lt;br&gt;Resources: 4 vCPU, 8GB RAM + GPU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=11;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="475" width="190" height="70" as="geometry"/>
+                </mxCell>
+                
+                <!-- PVE01 STORAGE & HARDWARE POOLS (BOTTOM - shifted to y=620) -->
+                <mxCell id="pve01Storage" value="&lt;b&gt;pve01 Storage &amp;amp; Hardware Pools&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacing=6;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="620" width="420" height="110" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve01OS" value="&lt;b&gt;256GB OS&lt;/b&gt;&lt;br&gt;Proxmox Boot" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="105" y="660" width="80" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve01SSD" value="&lt;b&gt;256GB SSD&lt;/b&gt;&lt;br&gt;Fast VMs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="205" y="660" width="85" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve01ZFS" value="&lt;b&gt;ZFS Mirror&lt;/b&gt;&lt;br&gt;4TB x2 (tank)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="660" width="90" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve01GPU" value="&lt;b&gt;RTX 2060 OC&lt;/b&gt;&lt;br&gt;Gigabyte 6GB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="415" y="660" width="85" height="50" as="geometry"/>
+                </mxCell>
+                
+                <!-- NODE 2: PVE02-MINI (expanded height to 450 and width to 480 for spaciousness) -->
+                <mxCell id="pve02" value="&lt;b&gt;pve02-mini&lt;/b&gt; — Secondary Compute (Hosting &amp;amp; Lab)&lt;br&gt;Intel Core i5-6500T · 24GB DDR4 · 192.168.1.11" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacing=6;fillColor=none;strokeColor=#666666;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="310" width="480" height="450" as="geometry"/>
+                </mxCell>
+                
+                <!-- PVE02 NETWORKING BLOCKS (TOP - starting at y=380) -->
+                <mxCell id="pve02VPN" value="&lt;b&gt;tailscale0&lt;/b&gt; (VPN)&lt;br/&gt;100.64.1.11" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#b19ffb;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="690" y="380" width="110" height="40" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="pve02Bridge" value="&lt;b&gt;vmbr0&lt;/b&gt; (Linux Bridge)&lt;br/&gt;Virtual Switch" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="380" width="180" height="40" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve02NIC" value="&lt;b&gt;eno1&lt;/b&gt; (NIC)&lt;br/&gt;Physical 1Gbps" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="380" width="90" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- PVE02 VIRTUAL MACHINES (MIDDLE - shifted to y=475) -->
+                <mxCell id="monitoring01" value="&lt;b&gt;monitoring-01&lt;/b&gt; (VM)&lt;br&gt;192.168.1.30 · Prometheus / Grafana&lt;br&gt;Resources: 2 vCPU, 4GB RAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=10;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="675" y="475" width="140" height="70" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="k3s01" value="&lt;b&gt;k3s-01&lt;/b&gt; (VM)&lt;br&gt;192.168.1.40 · Learning Lab Node&lt;br&gt;Resources: 2 vCPU, 4GB RAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=10;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="830" y="475" width="140" height="70" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="devops01" value="&lt;b&gt;devops-01&lt;/b&gt; (VM)&lt;br&gt;192.168.1.50 · CI/CD Testbed&lt;br&gt;Resources: 2 vCPU, 4GB RAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontSize=10;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="985" y="475" width="140" height="70" as="geometry"/>
+                </mxCell>
+                
+                <!-- PVE02 STORAGE POOLS (BOTTOM - shifted to y=620) -->
+                <mxCell id="pve02Storage" value="&lt;b&gt;pve02 Storage Pools&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;spacing=6;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="690" y="620" width="420" height="110" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="pve02Local" value="&lt;b&gt;256GB Local Disk&lt;/b&gt;&lt;br&gt;Proxmox OS &amp;amp; local VM Storage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontColor=#000000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="775" y="660" width="250" height="50" as="geometry"/>
+                </mxCell>
+                
+                <!-- TAKEAWAY MESSAGE BAR -->
+                <mxCell id="messageBar" value="&lt;b&gt;Message:&lt;/b&gt; A 2-node private cloud simulation where physical hardware serves as a unified compute and storage pool, set up manually with configurations documented in Git." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#404040;fontColor=#000000;arcSize=8;fontSize=11;align=left;spacing=8;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="795" width="1120" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- LEGEND -->
+                <mxCell id="legend" value="&lt;b&gt;Legend &amp;amp; Colour Roles&lt;/b&gt; (homelab theme): &lt;font color=&quot;#6C8EBF&quot;&gt;■ Network / External&lt;/font&gt; · &lt;font color=&quot;#666666&quot;&gt;■ Compute Hosts / Cluster&lt;/font&gt; · &lt;font color=&quot;#D6B656&quot;&gt;■ Storage &amp;amp; Hardware&lt;/font&gt; · &lt;font color=&quot;#82B366&quot;&gt;■ Virtual Machines / Workloads&lt;/font&gt; | &lt;i&gt;Solid lines = Data/Network flow · Dashed lines = Hardware Passthrough&lt;/i&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="850" width="1120" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- EDGES (ARROWS) -->
+                
+                <!-- Internet -> router-01 -->
+                <mxCell id="eInternetToRouter" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;WAN&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#6c8ebf;jumpStyle=arc;jumpSize=6;" parent="1" source="internet" target="router" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- router-01 -> switch-01 -->
+                <mxCell id="eRouterToSwitch" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Uplink (Port 1)&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#6c8ebf;jumpStyle=arc;jumpSize=6;" parent="1" source="router" target="switch" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- switch-01 -> Admin Workstation -->
+                <mxCell id="eSwitchToAdmin" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Admin (Port 2)&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#6c8ebf;jumpStyle=arc;jumpSize=6;" parent="1" source="switch" target="admin" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- switch-01 -> pve01-pc eno1 (routed through y=235) -->
+                <mxCell id="eSwitchToPve01" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Port 3 (Trunk)&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=0.15;exitY=1;entryX=0.5;entryY=0;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#6c8ebf;jumpStyle=arc;jumpSize=6;" parent="1" source="switch" target="pve01NIC" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="624" y="230"/>
+                            <mxPoint x="135" y="230"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                
+                <!-- switch-01 -> pve02-mini eno1 (routed through y=235) -->
+                <mxCell id="eSwitchToPve02" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Port 4 (Trunk)&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=0.85;exitY=1;entryX=0.5;entryY=0;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#6c8ebf;jumpStyle=arc;jumpSize=6;" parent="1" source="switch" target="pve02NIC" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="736" y="230"/>
+                            <mxPoint x="1065" y="230"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                
+                <!-- Cluster sync pve01 <-> pve02 -->
+                <mxCell id="eClusterSync" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Corosync Cluster&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=1;exitY=0.48;entryX=0;entryY=0.48;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#666666;jumpStyle=arc;jumpSize=6;" parent="1" source="pve01" target="pve02" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- ZFS Mirror -> nas-01 (ZFS Passthrough with custom waypoints at y=575) -->
+                <mxCell id="eZfsToNas" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;ZFS Passthrough&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;exitX=0.5;exitY=0;entryX=0.8;entryY=1;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#d6b656;jumpStyle=arc;jumpSize=6;" parent="1" source="pve01ZFS" target="nas01" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="355" y="575"/>
+                            <mxPoint x="242" y="575"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                
+                <!-- INTERNAL NETWORKING CONNECTIONS (PVE01) -->
+                <!-- nas-01 -> vmbr0 -->
+                <mxCell id="eNasToBridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.2;strokeColor=#82b366;exitX=0.8;exitY=0;entryX=0.2;entryY=1;fontColor=#000000;" parent="1" source="nas01" target="pve01Bridge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- ml-compute-01 -> vmbr0 -->
+                <mxCell id="eWorkerToBridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.2;strokeColor=#82b366;exitX=0.5;exitY=0;entryX=0.8;entryY=1;fontColor=#000000;" parent="1" source="mlcompute01" target="pve01Bridge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- eno1 <-> vmbr0 (pve01) -->
+                <mxCell id="eBridgeToNic1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.5;strokeColor=#666666;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#000000;" parent="1" source="pve01NIC" target="pve01Bridge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- INTERNAL NETWORKING CONNECTIONS (PVE02) -->
+                <!-- monitoring-01 -> vmbr0 -->
+                <mxCell id="eMonToBridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.2;strokeColor=#82b366;exitX=0.5;exitY=0;entryX=0.1;entryY=1;fontColor=#000000;" parent="1" source="monitoring01" target="pve02Bridge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- k3s-01 -> vmbr0 -->
+                <mxCell id="eControlToBridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.2;strokeColor=#82b366;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontColor=#000000;" parent="1" source="k3s01" target="pve02Bridge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- devops-01 -> vmbr0 -->
+                <mxCell id="eDevopsToBridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.2;strokeColor=#82b366;exitX=0.5;exitY=0;entryX=0.9;entryY=1;fontColor=#000000;" parent="1" source="devops01" target="pve02Bridge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- vmbr0 <-> eno1 (pve02) -->
+                <mxCell id="eBridgeToNic2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;startArrow=blockThin;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;strokeWidth=1.5;strokeColor=#666666;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#000000;" parent="1" source="pve02Bridge" target="pve02NIC" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- RTX 2060 -> ml-compute-01 (PCIe GPU Passthrough) -->
+                <mxCell id="eGpuPassthrough" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;PCIe Passthrough&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;dashed=1;exitX=0.5;exitY=0;entryX=0.724;entryY=1;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#d6b656;jumpStyle=arc;jumpSize=6;" parent="1" source="pve01GPU" target="mlcompute01" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <!-- Admin Workstation -> pve01-pc tailscale0 (VPN Overlay) -->
+                <mxCell id="eAdminToPve01VPN" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Tailnet&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;dashed=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#b19ffb;jumpStyle=arc;jumpSize=6;" parent="1" source="admin" target="pve01VPN" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="975" y="255"/>
+                            <mxPoint x="455" y="255"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                
+                <!-- Admin Workstation -> pve02-mini tailscale0 (VPN Overlay) -->
+                <mxCell id="eAdminToPve02VPN" value="&lt;span style=&quot;background-color: #ffffff; padding: 2px 6px; border: 1px solid #d3d3d3; border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);&quot;&gt;Tailnet&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=blockThin;endFill=1;strokeWidth=1.2;dashed=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=#000000;labelBackgroundColor=#ffffff;strokeColor=#b19ffb;jumpStyle=arc;jumpSize=6;" parent="1" source="admin" target="pve02VPN" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="975" y="255"/>
+                            <mxPoint x="745" y="255"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
