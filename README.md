@@ -18,12 +18,12 @@ The goal of this project is not only to run self-hosted services, but to documen
 flowchart TD
     Internet[Internet]
     Router[ISP Router / WiFi Box<br/>Gateway: 192.168.1.1]
-    Switch[1Gbps 5-port Switch]
+    Switch[TP-Link TL-SG108E<br/>8-port Easy Smart Switch]
 
     Admin[Admin Laptop / Desktop<br/>SSH / Proxmox Web UI / Git]
 
-    PVE01[pve01-pc<br/>Ryzen 5600X / 16GB RAM<br/>Storage-heavy Proxmox Node]
-    PVE02[pve02-mini<br/>Intel i5 / 24GB RAM<br/>Compute Proxmox Node]
+    PVE01[pve01-pc<br/>Ryzen 5600X / 16GB RAM / Gigabyte RTX 2060 OC 6GB<br/>Primary Compute & Storage Node]
+    PVE02[pve02-mini<br/>Intel i5-6500T / 24GB RAM<br/>Secondary Compute (Hosting & Lab)]
 
     Cluster[Proxmox Cluster<br/>homelab]
 
@@ -32,11 +32,11 @@ flowchart TD
 
     NAS[nas-01<br/>NAS / NFS / SMB]
     Monitoring[monitoring-01<br/>Prometheus / Grafana]
-    K3SCP[k3s-control-01]
-    K3SW[k3s-worker-01]
+    K3S[k3s-01<br/>Single-node K3s for Learning]
+    ML[ml-compute-01<br/>Ollama & Thesis ML Compute]
     DevOps[devops-01<br/>CI/CD Testbed]
 
-    Repo[GitHub Homelab Repo<br/>docs / inventory / scripts / cloud-init / ansible / terraform]
+    Repo[GitHub Homelab Repo<br/>Documentation & Setup Notes]
 
     Internet --> Router --> Switch
     Switch --> Admin
@@ -51,24 +51,25 @@ flowchart TD
 
     Storage01 --> NAS
     PVE02 --> Monitoring
-    PVE02 --> K3SCP
-    PVE01 --> K3SW
+    PVE02 --> K3S
+    PVE01 --> ML
     PVE02 --> DevOps
 
-    Repo -.documents and automates.-> Cluster
-    Repo -.manages.-> NAS
-    Repo -.manages.-> Monitoring
-    Repo -.manages.-> K3SCP
-    Repo -.manages.-> K3SW
+    Tailnet[Tailscale VPN<br/>Overlay: 100.64.0.0/10]
+    Admin -.VPN.-> Tailnet
+    Tailnet -.VPN.-> PVE01
+    Tailnet -.VPN.-> PVE02
+
+    Repo -.documents.-> Cluster
 ```
 
 ## Physical Inventory
 
 | Node         | Role                       | Hardware                               | Storage                           | Notes                              |
 | ------------ | -------------------------- | -------------------------------------- | --------------------------------- | ---------------------------------- |
-| `pve01-pc`   | Storage-heavy Proxmox node | Ryzen 5 5600X, 16GB DDR4, RTX 2060 6GB | 256GB NVMe, 256GB SSD, 4TB HDD x2 | Main storage/NAS node              |
-| `pve02-mini` | Compute Proxmox node       | Intel i5, 24GB DDR4                    | 256GB disk                        | Lightweight VM/k3s/monitoring node |
-| `switch-01`  | L2 network                 | 1Gbps 5-port switch                    | N/A                               | Flat LAN                           |
+| `pve01-pc`   | Primary Compute & Storage | Ryzen 5 5600X, 16GB DDR4, Gigabyte GeForce RTX 2060 OC 6GB GDDR6 | 256GB NVMe, 256GB SSD, 4TB HDD x2 | Powerful CPU/GPU node, dual-role  |
+| `pve02-mini` | Secondary Compute (Lab)    | Intel Core i5-6500T, 24GB DDR4         | 256GB disk                        | Hosting & learning testbed/labo    |
+| `switch-01`  | L2 network                 | TP-Link TL-SG108E (8-port Easy Smart)  | N/A                               | Flat LAN                           |
 | `router-01`  | Gateway                    | ISP WiFi box/router                    | N/A                               | NAT, DHCP/static lease             |
 
 ## Network Plan
@@ -80,32 +81,86 @@ Assumed LAN:
 Gateway: 192.168.1.1
 ```
 
-| Host             |             IP | Role                  |
-| ---------------- | -------------: | --------------------- |
-| `router-01`      |  `192.168.1.1` | Gateway               |
-| `pve01-pc`       | `192.168.1.10` | Proxmox node          |
-| `pve02-mini`     | `192.168.1.11` | Proxmox node          |
-| `nas-01`         | `192.168.1.20` | NAS / storage service |
-| `monitoring-01`  | `192.168.1.30` | Prometheus / Grafana  |
-| `k3s-control-01` | `192.168.1.40` | k3s control-plane     |
-| `k3s-worker-01`  | `192.168.1.41` | k3s worker            |
-| `devops-01`      | `192.168.1.50` | CI/CD testbed         |
+| Host             |         LAN IP |   Tailscale IP | Role                       |
+| ---------------- | -------------: | -------------: | -------------------------- |
+| `router-01`      |  `192.168.1.1` |            N/A | Gateway                    |
+| `pve01-pc`       | `192.168.1.10` | `100.64.1.10`  | Proxmox host               |
+| `pve02-mini`     | `192.168.1.11` | `100.64.1.11`  | Proxmox host               |
+| `nas-01`         | `192.168.1.20` |            N/A | NAS / storage service      |
+| `monitoring-01`  | `192.168.1.30` |            N/A | Prometheus / Grafana       |
+| `k3s-01`         | `192.168.1.40` |            N/A | k3s single-node (learning) |
+| `ml-compute-01`  | `192.168.1.41` |            N/A | Dedicated ML Compute       |
+| `devops-01`      | `192.168.1.50` |            N/A | CI/CD testbed              |
+| `Admin laptop`   |   `192.168.1.x` |  `100.64.1.50` | Admin Workstation          |
 
 VM traffic path:
 
 ```text
-VM NIC
-↓
-tap interface
-↓
-vmbr0
-↓
-physical NIC
-↓
-1Gbps switch
-↓
-router / LAN
+VM NIC -> tap interface -> vmbr0 (Linux Bridge) -> eno1 (Physical NIC) -> 1Gbps Switch -> Router / LAN
 ```
+
+### Physical Port Allocation (TL-SG108E Switch)
+
+| Switch Port | Connected Device | Cable Type | Speed | Config / VLAN |
+| ----------- | ---------------- | ---------- | ----- | ------------- |
+| **Port 1**  | `router-01` (LAN) | Cat6 UTP   | 1Gbps | Access VLAN 1 (Default) |
+| **Port 2**  | `Admin Workstation` | Cat6 UTP   | 1Gbps | Access VLAN 1 (Default) |
+| **Port 3**  | `pve01-pc` (`eno1`) | Cat6 UTP   | 1Gbps | Trunk (VLAN 1 Untagged) |
+| **Port 4**  | `pve02-mini` (`eno1`) | Cat6 UTP   | 1Gbps | Trunk (VLAN 1 Untagged) |
+| **Port 5-8**| *Spare / Unused* | N/A        | -     | N/A |
+
+### Proxmox VE Network Configuration
+
+The physical network interface (`eno1`) is bound to a virtual bridge (`vmbr0`) which acts as a virtual switch. VMs attach their virtual interfaces to `vmbr0`.
+
+#### `pve01-pc` Config (`/etc/network/interfaces`)
+
+```text
+auto lo
+iface lo inet loopback
+
+iface eno1 inet manual
+# Physical port connected to Switch Port 3
+
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.1.10/24
+        gateway 192.168.1.1
+        bridge-ports eno1
+        bridge-stp off
+        bridge-fd 0
+# Management IP and VM traffic bridge
+```
+
+#### `pve02-mini` Config (`/etc/network/interfaces`)
+
+```text
+auto lo
+iface lo inet loopback
+
+iface eno1 inet manual
+# Physical port connected to Switch Port 4
+
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.1.11/24
+        gateway 192.168.1.1
+        bridge-ports eno1
+        bridge-stp off
+        bridge-fd 0
+# Management IP and VM traffic bridge
+```
+
+### Remote Access & Management (Tailscale VPN)
+
+To securely manage the Proxmox cluster remotely without exposing ports to the public internet, **Tailscale** is installed directly on the hypervisor host nodes (`pve01-pc` and `pve02-mini`).
+
+- **Tailscale Daemon**: Runs directly in the host OS (Debian-based PVE) to handle wireguard encapsulation.
+- **Tailnet IPs**:
+  - `pve01-pc`: `100.64.1.10`
+  - `pve02-mini`: `100.64.1.11`
+- **Access Control**: Administrative workstations authenticate to the tailnet to access SSH (`port 22`) and the Proxmox Web UI (`port 8006`).
+- **Tailscale Virtual Interface (`tailscale0`)**: Configured automatically upon connection and handles packet routing securely inside the host network namespaces.
 
 ## Storage Design
 
@@ -142,6 +197,7 @@ Proxmox VE
 KVM/QEMU
 Linux bridge networking
 Local/ZFS-backed storage
+PCIe GPU Passthrough (Gigabyte GeForce RTX 2060 OC 6GB GDDR6)
 ```
 
 Cluster:
@@ -149,8 +205,8 @@ Cluster:
 ```text
 Cluster name: homelab
 Nodes:
-- pve01-pc
-- pve02-mini
+- pve01-pc (Ryzen 5 5600X, 16GB RAM, Gigabyte GeForce RTX 2060 OC 6GB GDDR6) - Primary Compute & Storage
+- pve02-mini (Intel Core i5-6500T, 24GB RAM) - Secondary Compute (Hosting & Testbed/Lab)
 ```
 
 Important limitation:
@@ -167,8 +223,8 @@ HA is disabled unless a third quorum vote/qdevice is added.
 | ---------------- | ------------ | ------------------------------------ | ------------------- |
 | `nas-01`         | `pve01-pc`   | NAS / NFS / SMB                      | 2 vCPU, 2–4GB RAM   |
 | `monitoring-01`  | `pve02-mini` | Prometheus, Grafana, exporters       | 2 vCPU, 4GB RAM     |
-| `k3s-control-01` | `pve02-mini` | Kubernetes control-plane demo        | 2 vCPU, 4GB RAM     |
-| `k3s-worker-01`  | `pve01-pc`   | Kubernetes worker demo               | 2 vCPU, 4GB RAM     |
+| `k3s-01`         | `pve02-mini` | Single-node K3s (pods, heal, LB lab) | 2 vCPU, 4GB RAM     |
+| `ml-compute-01`  | `pve01-pc`   | Local Ollama & Thesis ML Compute     | 4 vCPU, 8GB RAM + GPU |
 | `devops-01`      | `pve02-mini` | Jenkins/GitLab Runner/Docker testbed | 2 vCPU, 4GB RAM     |
 
 ## Repository Structure
