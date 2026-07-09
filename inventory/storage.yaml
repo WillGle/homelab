@@ -1,0 +1,16 @@
+# Schema for storage inventory.
+# Populate only with values verified against the real machines — see
+# STATE.md for the verification method and date.
+
+nodes:
+  - hostname:
+    disks:
+      - device:
+        size:
+        usage:
+    pools:
+      - name:
+        type:
+        members:
+    verified_at:
+    verified_via:

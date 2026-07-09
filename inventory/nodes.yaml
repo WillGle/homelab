@@ -1,0 +1,20 @@
+# Schema for physical/virtual node inventory.
+# Populate only with values verified against the real machines — see
+# STATE.md for the verification method and date. Leave a field blank
+# rather than guessing.
+
+nodes:
+  - hostname:
+    role:
+    hardware:
+      cpu:
+      ram:
+      gpu:
+    storage:
+      - device:
+        usage:
+    network:
+      lan_ip:
+      tailscale_ip:
+    verified_at:
+    verified_via:

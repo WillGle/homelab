@@ -1,0 +1,20 @@
+# Schema for network inventory.
+# Populate only with values verified against the real network — see
+# STATE.md for the verification method and date.
+
+lan:
+  subnet:
+  gateway:
+  verified_at:
+  verified_via:
+
+hosts:
+  - hostname:
+    lan_ip:
+    tailscale_ip:
+    role:
+
+switch_ports:
+  - port:
+    connected_device:
+    vlan:
