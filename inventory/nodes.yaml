@@ -1,20 +1,41 @@
-# Schema for physical/virtual node inventory.
-# Populate only with values verified against the real machines — see
-# STATE.md for the verification method and date. Leave a field blank
-# rather than guessing.
+# Source: diagrams/architecture.drawio — not yet cross-checked against live
+# hosts. See AGENT.md verification protocol before treating as ground truth.
+#
+# Placeholder convention:
+#   <UNVERIFIED>  = not yet confirmed against the live host, needs checking
+#   none          = confirmed absent per the diagram (not a gap)
 
 nodes:
-  - hostname:
-    role:
+  - hostname: pve01-pc
+    role: Compute & Storage Host
     hardware:
-      cpu:
-      ram:
-      gpu:
+      cpu: AMD Ryzen 5 5600X
+      ram: 16GB DDR4
+      gpu: RTX 2060 OC (Gigabyte, 6GB)
     storage:
-      - device:
-        usage:
+      - device: 256GB
+        usage: Proxmox boot (OS)
+      - device: 256GB SSD
+        usage: fast VM storage
+      - device: ZFS mirror 2x 4TB (pool tank)
+        usage: bulk storage, backs nas-01
     network:
-      lan_ip:
-      tailscale_ip:
-    verified_at:
-    verified_via:
+      lan_ip: 192.168.1.10
+      tailscale_ip: 100.64.1.10
+    verified_at: <UNVERIFIED>
+    verified_via: <UNVERIFIED>
+
+  - hostname: pve02-mini
+    role: Secondary Compute (Hosting & Lab)
+    hardware:
+      cpu: Intel Core i5-6500T
+      ram: 24GB DDR4
+      gpu: none
+    storage:
+      - device: 256GB local disk
+        usage: Proxmox OS & local VM storage
+    network:
+      lan_ip: 192.168.1.11
+      tailscale_ip: 100.64.1.11
+    verified_at: <UNVERIFIED>
+    verified_via: <UNVERIFIED>

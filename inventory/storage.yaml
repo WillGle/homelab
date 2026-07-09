@@ -1,16 +1,31 @@
-# Schema for storage inventory.
-# Populate only with values verified against the real machines — see
-# STATE.md for the verification method and date.
+# Source: diagrams/architecture.drawio — not yet cross-checked against live
+# hosts. See AGENT.md verification protocol before treating as ground truth.
+#
+# Placeholder convention:
+#   <UNVERIFIED>  = not yet confirmed against the live host, needs checking
+#   none          = confirmed absent per the diagram (not a gap)
 
 nodes:
-  - hostname:
+  - hostname: pve01-pc
     disks:
-      - device:
-        size:
-        usage:
+      - device: OS disk
+        size: 256GB
+        usage: Proxmox boot
+      - device: SSD
+        size: 256GB
+        usage: fast VM storage
     pools:
-      - name:
-        type:
-        members:
-    verified_at:
-    verified_via:
+      - name: tank
+        type: ZFS mirror
+        members: 2x 4TB
+    verified_at: <UNVERIFIED>
+    verified_via: <UNVERIFIED>
+
+  - hostname: pve02-mini
+    disks:
+      - device: local disk
+        size: 256GB
+        usage: Proxmox OS & local VM storage
+    pools: none # no ZFS pool per diagram, local disk only
+    verified_at: <UNVERIFIED>
+    verified_via: <UNVERIFIED>

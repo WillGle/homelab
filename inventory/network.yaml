@@ -1,20 +1,57 @@
-# Schema for network inventory.
-# Populate only with values verified against the real network — see
-# STATE.md for the verification method and date.
+# Source: diagrams/architecture.drawio — not yet cross-checked against live
+# hosts. See AGENT.md verification protocol before treating as ground truth.
+#
+# Placeholder convention:
+#   <UNVERIFIED>       = not yet confirmed against the live host, needs checking
+#   <NOT DOCUMENTED>    = not shown in the diagram at all, unknown either way
+#   none                = confirmed absent per the diagram (not a gap)
 
 lan:
-  subnet:
-  gateway:
-  verified_at:
-  verified_via:
+  subnet: 192.168.1.0/24
+  gateway: 192.168.1.1 # router-01
+  verified_at: <UNVERIFIED>
+  verified_via: <UNVERIFIED>
 
 hosts:
-  - hostname:
-    lan_ip:
-    tailscale_ip:
-    role:
+  - hostname: pve01-pc
+    lan_ip: 192.168.1.10
+    tailscale_ip: 100.64.1.10
+    role: proxmox node
+  - hostname: pve02-mini
+    lan_ip: 192.168.1.11
+    tailscale_ip: 100.64.1.11
+    role: proxmox node
+  - hostname: nas-01
+    lan_ip: 192.168.1.20
+    tailscale_ip: <NOT DOCUMENTED>
+    role: vm - nfs/smb share
+  - hostname: monitoring-01
+    lan_ip: 192.168.1.30
+    tailscale_ip: <NOT DOCUMENTED>
+    role: vm - prometheus/grafana
+  - hostname: k3s-01
+    lan_ip: 192.168.1.40
+    tailscale_ip: <NOT DOCUMENTED>
+    role: vm - learning lab node
+  - hostname: ml-compute-01
+    lan_ip: 192.168.1.41
+    tailscale_ip: <NOT DOCUMENTED>
+    role: vm - ml/thesis compute (gpu passthrough)
+  - hostname: devops-01
+    lan_ip: 192.168.1.50
+    tailscale_ip: <NOT DOCUMENTED>
+    role: vm - ci/cd testbed
 
 switch_ports:
-  - port:
-    connected_device:
-    vlan:
+  - port: 1
+    connected_device: router-01
+    vlan: none # diagram describes a flat LAN, no VLAN segmentation shown
+  - port: 2
+    connected_device: admin workstation
+    vlan: none
+  - port: 3
+    connected_device: pve01-pc (trunk)
+    vlan: none
+  - port: 4
+    connected_device: pve02-mini (trunk)
+    vlan: none
