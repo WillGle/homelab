@@ -1,7 +1,7 @@
 # Homelab Private Cloud
 
 A 2-node Proxmox/KVM homelab, currently set up manually. This repository is the
-handoff spec for turning that manual setup into Infrastructure as Code (IaC) —
+handoff spec for turning that manual setup into Infrastructure as Code (IaC),
 it documents what exists and the rules for any human or agent automating it.
 
 ![Homelab Architecture](diagrams/architecture.svg)
