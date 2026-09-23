@@ -6,7 +6,8 @@ Media platforms.
 
 ```mermaid
 flowchart TB
-  subgraph platforms[Platform layer]
+  work[Work / project repositories]
+  subgraph platforms[Platform repositories]
     software[Software]
     engineering[Engineering]
     knowledge[Knowledge]
@@ -19,8 +20,8 @@ flowchart TB
     network[Network plane]
     management[Management plane]
   end
-  metal[Bare metal]
-  platforms --> contract --> homelab --> metal
+  metal[Bare metal capacity]
+  work --> platforms --> contract --> homelab --> metal
 ```
 
 ## Scope
@@ -41,7 +42,7 @@ infrastructure contracts those workloads need; it does not own the workloads.
 | [architecture/](architecture/) | Desired platform boundary, infrastructure planes, and workload contracts. |
 | [provisioning/](provisioning/) | The intended path from manually bootstrapped metal to generic capacity. |
 | [STATE.md](STATE.md) | Facts directly verified against the live environment. |
-| [diagrams/](diagrams/) | Platform, physical inventory, and network views. |
+| [diagrams/](diagrams/) | Editable desired-architecture and reported-inventory views. |
 | [docs/legacy/](docs/legacy/) | Preserved v1 records that came from an unverified diagram. |
 
 Inventory records inherited from the old diagram are explicitly marked
@@ -57,6 +58,12 @@ design has been implemented. No IaC is present yet.
 
 ## Diagrams
 
-- [Platform boundary](diagrams/platform.drawio)
-- [Reported physical inventory](diagrams/physical.drawio)
-- [Logical and reported network](diagrams/network.drawio)
+The `.drawio` files are editable source diagrams. They separate desired
+architecture from reported, unverified inventory:
+
+| View | Meaning |
+| --- | --- |
+| [Platform boundary](diagrams/platform.drawio) | Desired ownership and capacity flow from platform repositories to bare metal. |
+| [Logical and reported network](diagrams/network.drawio) | Desired logical zones beside the historical flat-LAN report. |
+| [Reported physical inventory](diagrams/physical.drawio) | Reported hosts and storage, with verification gaps called out. |
+| [Legacy v1 topology redraw](docs/legacy/architecture-v1.drawio) | Readability redraw of the historical topology; not target architecture. |

@@ -1,8 +1,10 @@
-# Current State
+# Legacy v1 State
 
-Source: `architecture-v1.drawio`. This reflects what the diagram
-documents, not a live check against the hardware — treat it as
-`[UNVERIFIED]` until confirmed with the commands in [`../../AGENT.md`](../../AGENT.md).
+Source: the historical `architecture-v1.drawio` report. The editable diagram
+has since been redrawn for readability, but this document still reflects the
+reported topology rather than a live check against the hardware — treat every
+value as `[UNVERIFIED]` until confirmed with the commands in
+[`../../AGENT.md`](../../AGENT.md).
 
 ## Nodes
 

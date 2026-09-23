@@ -2,7 +2,8 @@
 
 This is the intended sequence from physical machines to generic infrastructure
 capacity. It is a plan; no Ansible, OpenTofu, or cloud-init configuration is
-implemented in this repository yet.
+implemented in this repository yet. The [platform boundary diagram](../diagrams/platform.drawio)
+summarizes the capacity hand-off at the end of this lifecycle.
 
 ```text
 Verified inventory

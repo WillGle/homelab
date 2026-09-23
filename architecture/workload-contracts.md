@@ -1,7 +1,9 @@
 # Workload Contracts
 
 Contracts describe the infrastructure a workload class needs. They do not
-assign a platform or application to a particular metal or guest.
+assign a platform or application to a particular metal or guest. The
+[platform boundary diagram](../diagrams/platform.drawio) shows where these
+contracts sit between platform repositories and the infrastructure fabric.
 
 ```yaml
 workload_classes:

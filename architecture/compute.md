@@ -1,6 +1,8 @@
 # Compute Plane
 
-This describes desired compute capacity, not current placement.
+This describes desired compute capacity, not current placement. The
+[platform boundary diagram](../diagrams/platform.drawio) shows compute as a
+generic infrastructure plane rather than an application assignment.
 
 The compute plane offers CPU, memory, and optional GPU capacity through
 virtualization. Metal is selected by available capability and workload needs;

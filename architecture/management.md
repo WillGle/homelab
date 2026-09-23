@@ -1,7 +1,9 @@
 # Management Plane
 
 The management plane provides controlled access to and observability of the
-infrastructure itself: metal, virtualization, network, and storage.
+infrastructure itself: metal, virtualization, network, and storage. It is shown
+as a generic plane in the [platform boundary diagram](../diagrams/platform.drawio)
+and as a logical zone in the [network view](../diagrams/network.drawio).
 
 ## Design intent
 

@@ -3,6 +3,10 @@
 This describes logical connectivity requirements. Current physical topology
 and network settings belong in inventory and must be live-verified.
 
+The [network view](../diagrams/network.drawio) places the desired zones beside
+the unverified reported LAN; the [physical inventory view](../diagrams/physical.drawio)
+shows the reported host endpoints separately.
+
 ## Logical zones
 
 - **Management** — Proxmox administration, SSH, and infrastructure APIs.

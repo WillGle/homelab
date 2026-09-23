@@ -7,6 +7,9 @@ Homelab is the private infrastructure fabric below the Software, Engineering,
 Knowledge, and Media platforms. It supplies virtualized compute, storage,
 network connectivity, and management capacity through workload contracts.
 
+See the editable [platform boundary diagram](../diagrams/platform.drawio) for
+this ownership and capacity flow.
+
 ```text
 Work and projects
         ↓

@@ -10,6 +10,10 @@ The old state and inventory documents are preserved under [docs/legacy/](docs/le
 They were derived from a diagram and must not be treated as evidence of what is
 running now.
 
+For visual context, see the [reported physical inventory](diagrams/physical.drawio)
+and [logical/network view](diagrams/network.drawio). Both are reference views,
+not verification evidence.
+
 ## Verification status
 
 - Metals and Proxmox: not verified

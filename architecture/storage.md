@@ -1,7 +1,9 @@
 # Storage Plane
 
 This describes logical storage services independently of their physical
-placement.
+placement. The [platform boundary diagram](../diagrams/platform.drawio) keeps
+these contracts separate from the reported hardware in the
+[physical inventory view](../diagrams/physical.drawio).
 
 | Class | Intended use | Required properties |
 | --- | --- | --- |
