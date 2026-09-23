@@ -10,7 +10,7 @@ it is not assigned an application identity.
 
 ## Design intent
 
-- Use generic guests or runtimes to provide the requested workload class.
+- Use generic guests or runtimes to provide the requested workload profile.
 - Keep placement decisions based on verified capacity, required resources, and
   resilience needs.
 - Allow one guest to support multiple related services where their resource
@@ -22,4 +22,4 @@ it is not assigned an application identity.
   an established need.
 
 Specific guest sizes, runtime choices, and placement rules remain undecided
-until the live inventory and workload contracts are reviewed.
+until the live inventory, capability catalog, and workload profiles are reviewed.

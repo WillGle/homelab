@@ -11,8 +11,9 @@ and as a logical zone in the [network view](../diagrams/network.drawio).
   the verified network allows it.
 - Provide stable management access for operators and automation.
 - Record changes and verification evidence in the repository.
-- Expose infrastructure capacity to platform owners through documented
-  contracts, without taking ownership of application deployment.
+- Expose infrastructure capacity to platform/workload owners through
+  documented profiles and capabilities, without taking ownership of
+  application deployment.
 - Keep recovery and backup procedures tied to verified systems and tested
   recovery evidence.
 

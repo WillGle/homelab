@@ -18,7 +18,7 @@ Generic VMs or containers
        ↓
 Guest initialization
        ↓
-Infrastructure contracts consumed by platforms
+Workload profiles and capabilities consumed by platform/workload owners
 ```
 
 ## Boundaries
@@ -31,16 +31,16 @@ Infrastructure contracts consumed by platforms
 3. **Configure infrastructure.** Ansible may manage reviewed Proxmox host
    settings and infrastructure services after the live baseline is recorded.
    Changes to running guests, networking, GPU passthrough, or storage require
-   the safeguards in `AGENT.md`.
+   an explicit, reviewed change procedure before implementation.
 4. **Create generic capacity.** OpenTofu may manage virtual machines,
-   containers, volumes, or networks through the Proxmox API once their
-   contracts and provider behavior are decided.
+   containers, volumes, or networks through the Proxmox API once workload
+   requirements and provider behavior are decided.
 5. **Initialize guests.** Cloud-init may establish a guest OS baseline and
-   return access to the platform owner.
-6. **Hand off by contract.** Platform repositories deploy applications and
+   return access to the platform/workload owner.
+6. **Hand off by profile.** Platform/workload owners deploy applications and
    own their application data and runtime configuration.
 
-Guest names should describe a workload class or shared infrastructure role,
+Guest names should describe a workload profile or shared infrastructure role,
 not an application name. No guest layout is selected yet. Kubernetes is not
 part of the baseline; introducing it requires a separate decision based on
 operational need.

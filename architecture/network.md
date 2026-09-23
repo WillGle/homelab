@@ -18,3 +18,9 @@ shows the reported host endpoints separately.
 These are logical zones. VLANs, firewall policy, address ranges, and whether
 some zones share a physical network are implementation decisions. The current
 reported flat LAN is unverified and does not define the desired logical model.
+
+Zones describe traffic domains; network capabilities such as `network.internal`
+and `network.ingress` describe properties requested by a workload profile.
+Neither capability implies a VLAN or fixes the physical implementation. See
+the [capability catalog](capabilities.md) and
+[workload profiles](workload-profiles.md).

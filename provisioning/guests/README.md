@@ -1,5 +1,5 @@
 # Guests
 
-Define generic VM or container capacity from workload contracts. Guest OS
-initialization may use cloud-init; platform repositories own application
+Define generic VM or container capacity to satisfy workload profiles. Guest
+OS initialization may use cloud-init; platform/workload owners own application
 deployment.
