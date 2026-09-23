@@ -1,61 +1,85 @@
 <mxfile host="app.diagrams.net" version="24.7.17" type="device">
-    <diagram id="platform" name="Platform">
-        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="800" math="0" shadow="0">
-            <root>
-                <mxCell id="0"/>
-                <mxCell id="1" parent="0"/>
-                <mxCell id="platforms" value="Platform layer&#xa;Software | Engineering | Knowledge | Media" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=18;" vertex="1" parent="1">
-                    <mxGeometry x="180" y="40" width="640" height="100" as="geometry"/>
-                </mxCell>
-                <mxCell id="contracts" value="Infrastructure contracts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=18;" vertex="1" parent="1">
-                    <mxGeometry x="300" y="190" width="400" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="homelab" value="HOMELAB — private infrastructure fabric" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;dashed=1;fontSize=18;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
-                    <mxGeometry x="70" y="310" width="840" height="130" as="geometry"/>
-                </mxCell>
-                <mxCell id="compute" value="Compute plane" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-                    <mxGeometry x="110" y="340" width="180" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="storage" value="Storage plane" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-                    <mxGeometry x="310" y="340" width="180" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="network" value="Network plane" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-                    <mxGeometry x="510" y="340" width="180" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="management" value="Management plane" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-                    <mxGeometry x="710" y="340" width="180" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="metal" value="Bare metal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=18;" vertex="1" parent="1">
-                    <mxGeometry x="360" y="520" width="280" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="e1" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="platforms" target="contracts">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e2" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="contracts" target="compute">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e2s" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="contracts" target="storage">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e2n" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="contracts" target="network">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e2m" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="contracts" target="management">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e3" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="compute" target="metal">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e4" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="storage" target="metal">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e5" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="network" target="metal">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="e6" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="management" target="metal">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-            </root>
-        </mxGraphModel>
-    </diagram>
+  <diagram id="platform" name="Platform">
+    <mxGraphModel dx="1400" dy="1100" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1200" pageHeight="1120" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Platform boundary — desired ownership and capacity flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#1f2937;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="20" width="1080" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="scope" value="Viewpoint: desired architecture · This repository records intent, not a claim about the live deployment." style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="180" y="70" width="840" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="repositories" value="Repository ownership" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#94a3b8;dashed=1;container=1;pointerEvents=0;verticalAlign=top;spacingTop=8;fontColor=#334155;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="145" width="1000" height="255" as="geometry"/>
+        </mxCell>
+        <mxCell id="work" value="&lt;b&gt;Work / project repositories&lt;/b&gt;&lt;br&gt;Source, research artifacts, designs, and media content" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#64748b;fontColor=#1f2937;fontSize=11;" vertex="1" parent="repositories">
+          <mxGeometry x="290" y="35" width="420" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="platforms" value="&lt;b&gt;Platform repositories&lt;/b&gt;&lt;br&gt;Software · Engineering · Knowledge · Media&lt;br&gt;Own application deployment and runtime configuration" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1f2937;fontSize=11;" vertex="1" parent="repositories">
+          <mxGeometry x="180" y="140" width="640" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="contracts" value="&lt;b&gt;Infrastructure contracts&lt;/b&gt;&lt;br&gt;Workload classes request compute, storage, network, management, and backup properties" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="455" width="600" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="fabric" value="&lt;b&gt;Homelab private infrastructure fabric&lt;/b&gt;&lt;br&gt;Supplies generic capacity without owning application runtime" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#1f2937;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="120" y="595" width="960" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="compute" value="&lt;b&gt;Compute plane&lt;/b&gt;&lt;br&gt;CPU · memory · optional GPU&lt;br&gt;Placement follows verified capacity" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="80" y="730" width="220" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="storage" value="&lt;b&gt;Storage plane&lt;/b&gt;&lt;br&gt;Hot · bulk · backup classes&lt;br&gt;Physical placement remains open" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="330" y="730" width="220" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="network" value="&lt;b&gt;Network plane&lt;/b&gt;&lt;br&gt;Management · service · storage&lt;br&gt;Lab/IoT · ingress zones" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="580" y="730" width="220" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="management" value="&lt;b&gt;Management plane&lt;/b&gt;&lt;br&gt;Operator access · automation&lt;br&gt;Observability · evidence" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="830" y="730" width="220" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="metal" value="&lt;b&gt;Bare metal capacity&lt;/b&gt;&lt;br&gt;Reported hosts are inventory leads until live checks are recorded." style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#1f2937;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="880" width="600" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="lifecycle" value="Provisioning lifecycle: verify inventory → manual Proxmox bootstrap → configure infrastructure → create generic guests → hand off by contract.&lt;br&gt;No Ansible/OpenTofu/cloud-init implementation is present in this repository yet." style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#64748b;fontColor=#1f2937;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="990" width="960" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend" value="Legend: blue = platform boundary · green = infrastructure capacity · yellow = contracts / constraints · gray = neutral repository context · red = unverified reported state" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontColor=#475569;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1075" width="960" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-work-platforms" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="work" target="platforms">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-platforms-contracts" value="&lt;span style=&quot;background-color:#ffffff; padding:2px 6px; border:1px solid #d3d3d3; border-radius:4px;&quot;&gt;request capacity&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="platforms" target="contracts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-contracts-fabric" value="&lt;span style=&quot;background-color:#ffffff; padding:2px 6px; border:1px solid #d3d3d3; border-radius:4px;&quot;&gt;provided by&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="contracts" target="fabric">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fabric-compute" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.08;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fabric" target="compute">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fabric-storage" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.34;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fabric" target="storage">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fabric-network" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.60;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fabric" target="network">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-fabric-management" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.86;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fabric" target="management">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-compute-metal" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.15;entryY=0;" edge="1" parent="1" source="compute" target="metal">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-storage-metal" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.35;entryY=0;" edge="1" parent="1" source="storage" target="metal">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-network-metal" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.65;entryY=0;" edge="1" parent="1" source="network" target="metal">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-management-metal" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=6;endArrow=blockThin;endFill=1;strokeWidth=1.2;strokeColor=#64748b;fontColor=#334155;exitX=0.5;exitY=1;entryX=0.85;entryY=0;" edge="1" parent="1" source="management" target="metal">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
 </mxfile>
