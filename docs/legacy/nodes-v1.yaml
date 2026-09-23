@@ -1,5 +1,5 @@
-# Source: diagrams/architecture.drawio — not yet cross-checked against live
-# hosts. See AGENT.md verification protocol before treating as ground truth.
+# Source: architecture-v1.drawio — not yet cross-checked against live hosts.
+# See ../../AGENT.md verification protocol before treating as ground truth.
 #
 # Placeholder convention:
 #   <UNVERIFIED>  = not yet confirmed against the live host, needs checking
