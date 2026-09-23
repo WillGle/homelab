@@ -1,0 +1,30 @@
+# Reported storage from the v1 diagram. Device identities and all values are
+# unverified against the live hosts.
+metals:
+  pve01:
+    disks:
+      - label: reported OS disk
+        size_gb: 256
+        reported_use: Proxmox boot
+      - label: reported SSD
+        size_gb: 256
+        reported_use: fast VM storage
+    pools:
+      - name: tank
+        type: ZFS mirror
+        member_count: 2
+        member_size_tb: 4
+        reported_use: bulk storage
+    verification:
+      status: unverified
+      source: ../docs/legacy/architecture-v1.drawio
+
+  pve02:
+    disks:
+      - label: reported local disk
+        size_gb: 256
+        reported_use: Proxmox OS and local VM storage
+    pools: []
+    verification:
+      status: unverified
+      source: ../docs/legacy/architecture-v1.drawio

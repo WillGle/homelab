@@ -1,0 +1,24 @@
+# Network devices and links reported by the v1 diagram. Verify before using
+# these records for configuration or automation.
+devices:
+  router-01:
+    kind: router
+    reported_management_ip: 192.168.1.1
+    verification_status: unverified
+
+  switch-01:
+    kind: ethernet_switch
+    model: TP-Link TL-SG108E
+    port_count: 8
+    verification_status: unverified
+    reported_connections:
+      - port: 1
+        peer: router-01
+      - port: 2
+        peer: admin workstation
+      - port: 3
+        peer: pve01-pc
+        reported_link_role: trunk
+      - port: 4
+        peer: pve02-mini
+        reported_link_role: trunk

@@ -1,0 +1,39 @@
+# Reported physical hardware from the v1 diagram. Nothing in this file has
+# been cross-checked against the live hosts yet.
+metals:
+  pve01:
+    reported_hostname: pve01-pc
+    hardware:
+      cpu:
+        model: AMD Ryzen 5 5600X
+      memory:
+        capacity_gb: 16
+        type: DDR4
+      gpu:
+        model: RTX 2060 OC (Gigabyte)
+        vram_gb: 6
+    capabilities:
+      cpu_compute: reported
+      gpu_compute: reported
+      memory_capacity_gb: 16
+    verification:
+      status: unverified
+      source: ../docs/legacy/architecture-v1.drawio
+
+  pve02:
+    reported_hostname: pve02-mini
+    hardware:
+      cpu:
+        model: Intel Core i5-6500T
+      memory:
+        capacity_gb: 24
+        type: DDR4
+      gpu:
+        status: not_documented
+    capabilities:
+      cpu_compute: reported
+      gpu_compute: not_documented
+      memory_capacity_gb: 24
+    verification:
+      status: unverified
+      source: ../docs/legacy/architecture-v1.drawio
