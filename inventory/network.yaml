@@ -1,29 +1,54 @@
-# Host interface addresses are live-verified; gateway and topology claims below
-# are retained from the historical diagram and remain unverified.
+# Host interface and route facts are live-verified. The flat topology remains
+# only partially verified because the switch/router path has not been inventoried.
 lan:
   subnet: 192.168.1.0/24
   gateway:
     address: 192.168.1.1
     reported_name: router-01
-    verification_status: unverified
+    reported_name_verification_status: unverified
+    verification_status: verified
+    verification_method: Ansible over SSH through Tailscale (ip route)
+    verified_at: "2026-09-24"
   topology: flat
   verification:
     status: partially_verified
-    method: Ansible over SSH through Tailscale (ip -br addr)
+    method: Ansible over SSH through Tailscale (host routes and interface configuration; switch/router path not checked)
     verified_at: "2026-09-24"
 
 management_endpoints:
   - metal: pve-mini
     lan_interface: vmbr0
     lan_ip: 192.168.1.222/24
+    address_assignment: dhcp
     tailscale_interface: tailscale0
     tailscale_ip: 100.71.142.105
     verification_status: verified
   - metal: pve-station
     lan_interface: vmbr0
     lan_ip: 192.168.1.51/24
+    address_assignment: static
     tailscale_interface: tailscale0
     tailscale_ip: 100.107.148.30
     verification_status: verified
+
+proxmox_cluster:
+  status: standalone
+  members: [pve-mini, pve-station]
+  verification_status: verified
+  method: Ansible stat of /etc/pve/corosync.conf on both hosts
+  verified_at: "2026-09-24"
+
+guest_endpoints:
+  - vm: lab-general-01
+    vmid: 100
+    host: pve-mini
+    lan_ip: 192.168.1.120/24
+    mac: "BC:24:11:68:12:A8"
+    address_assignment: dhcp
+    dhcp_reservation_status: unverified
+    ssh_user: will
+    ssh_bastion: pve-mini
+    verification_status: verified
+    verified_at: "2026-09-24"
 
 verification_status: partially_verified

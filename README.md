@@ -50,10 +50,12 @@ does not own the workloads.
 Core Proxmox host, interface, disk, storage, and guest facts were live-verified
 on 2026-09-24 and are recorded in [STATE.md](STATE.md) and `inventory/`.
 Remaining claims inherited from the old diagram are explicitly marked
-unverified; they are not current-state claims. Architecture documents describe
-intent and do not assert that the design has been implemented. A minimal
-[Ansible baseline playbook](provisioning/ansible/playbooks/proxmox-baseline.yml)
-is present; OpenTofu and cloud-init configuration are not implemented yet.
+unverified; they are not current-state claims. The Ansible host baseline and
+[Ubuntu cloud-init template](provisioning/ansible/playbooks/build-ubuntu-template.yml)
+are implemented and live-verified. [Cloud-init guest provisioning](provisioning/ansible/playbooks/create-test-vm.yml)
+and the [guest baseline](provisioning/ansible/playbooks/guest-baseline.yml)
+are implemented; guest SSH and the QEMU guest agent are live-verified. OpenTofu
+is not implemented.
 
 ## Start here
 

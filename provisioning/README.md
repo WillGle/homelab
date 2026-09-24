@@ -1,10 +1,12 @@
 # Provisioning Lifecycle
 
-This is the intended sequence from physical machines to generic infrastructure
-capacity. A minimal [Ansible baseline playbook](ansible/playbooks/proxmox-baseline.yml)
-is present; OpenTofu and cloud-init configuration are not implemented yet. The
-[platform boundary diagram](../diagrams/platform.drawio) summarizes the capacity
-hand-off at the end of this lifecycle.
+This describes the path from physical machines to generic infrastructure
+capacity. The [Ansible host baseline](ansible/playbooks/proxmox-baseline.yml),
+[Ubuntu cloud-init template](ansible/playbooks/build-ubuntu-template.yml),
+[guest provisioning](ansible/playbooks/create-test-vm.yml), and [guest baseline](ansible/playbooks/guest-baseline.yml)
+are implemented. OpenTofu is not implemented. The [platform boundary
+diagram](../diagrams/platform.drawio) summarizes the capacity hand-off at the
+end of this lifecycle.
 
 ```text
 Verified inventory
@@ -48,6 +50,19 @@ operational need.
 
 ## Implementation status
 
-- Core Proxmox host, interface, disk, storage, and guest status: verified 2026-09-24; gateway/topology details remain unverified
-- Manual Proxmox bootstrap: current status unknown
-- Ansible inventory/configuration and the [Proxmox baseline playbook](ansible/playbooks/proxmox-baseline.yml) are present; OpenTofu and cloud-init are not implemented.
+- Ansible host baseline: implemented and verified on both standalone Proxmox
+  hosts.
+- Ubuntu cloud-init template: implemented and live-verified on `pve-mini` as
+  VMID 9000.
+- Cloud-init guest provisioning: implemented and live-verified for running
+  VMID 100; cloud-init completed with a deprecated-user warning.
+- Ansible guest baseline: implemented; guest SSH and the QEMU guest agent are
+  live-verified.
+- OpenTofu: not implemented.
+- `lab-general-01` DHCP reservation: unverified; its current lease is
+  `192.168.1.120`.
+- LAN topology: partially verified; switch/router path is not inventoried.
+- Proxmox CLI check mode: playbooks print a plan because `qm` mutations cannot
+  be simulated; per-step checks allow interrupted template/VM creation to
+  resume.
+- Manual Proxmox bootstrap: current status unknown.

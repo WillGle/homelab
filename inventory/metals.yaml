@@ -1,4 +1,4 @@
-# Live Proxmox host facts verified over Ansible/SSH through Tailscale.
+# Live Proxmox host and guest facts verified over Ansible/SSH through Tailscale.
 metals:
   pve-mini:
     hostname: pve-mini
@@ -11,17 +11,29 @@ metals:
       lan:
         address: 192.168.1.222/24
         interface: vmbr0
+        assignment: dhcp
       tailscale:
         address: 100.71.142.105
     software:
       proxmox_version: "9.2.2"
       kernel: "7.0.2-6-pve"
+    cluster:
+      status: standalone
     running_guests:
-      vms: []
+      vms:
+        - vmid: 100
+          name: lab-general-01
+          status: running
+          os: Ubuntu 24.04
+          lan_address: 192.168.1.120/24
       lxcs: []
+    templates:
+      - vmid: 9000
+        name: ubuntu-2404-cloud
+        status: template
     verification:
       status: verified
-      method: Ansible over SSH through Tailscale
+      method: Ansible over SSH through Tailscale (Proxmox config, network config, and guest SSH)
       verified_at: "2026-09-24"
 
   pve-station:
@@ -35,15 +47,19 @@ metals:
       lan:
         address: 192.168.1.51/24
         interface: vmbr0
+        assignment: static
       tailscale:
         address: 100.107.148.30
     software:
       proxmox_version: "9.2.2"
       kernel: "7.0.2-6-pve"
+    cluster:
+      status: standalone
     running_guests:
       vms: []
       lxcs: []
+    templates: []
     verification:
       status: verified
-      method: Ansible over SSH through Tailscale
+      method: Ansible over SSH through Tailscale (Proxmox config and network config)
       verified_at: "2026-09-24"
