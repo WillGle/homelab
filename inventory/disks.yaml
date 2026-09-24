@@ -1,30 +1,151 @@
-# Reported storage from the v1 diagram. Device identities and all values are
-# unverified against the live hosts.
+# Live block-device and Proxmox storage observations from Ansible.
+# Device names are the kernel names returned by lsblk; serial numbers were not queried.
 metals:
-  pve01:
-    disks:
-      - label: reported OS disk
-        size_gb: 256
-        reported_use: Proxmox boot
-      - label: reported SSD
-        size_gb: 256
-        reported_use: fast VM storage
-    pools:
-      - name: tank
-        type: ZFS mirror
-        member_count: 2
-        member_size_tb: 4
-        reported_use: bulk storage
+  pve-mini:
+    devices:
+      - name: sda
+        size: 223.6G
+        filesystem: LVM2_member
+        logical_storage: mini-sata (lvmthin)
+      - name: sdb
+        size: 465.8G
+        partitions:
+          - name: sdb1
+            size: 465.8G
+            filesystem: ext4
+            mountpoint: /mnt/disks/archive-500a
+      - name: sdc
+        size: 465.8G
+        partitions:
+          - name: sdc1
+            size: 465.8G
+            filesystem: ext4
+            mountpoint: /mnt/disks/archive-500b
+      - name: sdd
+        size: 149.1G
+        partitions:
+          - name: sdd1
+            size: 149G
+            filesystem: ext4
+            mountpoint: /mnt/disks/archive-160
+      - name: sde
+        size: 931.5G
+        partitions:
+          - name: sde1
+            size: 931.5G
+            filesystem: ext4
+            mountpoint: /mnt/disks/backup-1tb
+      - name: nvme0n1
+        size: 119.2G
+        partitions:
+          - name: nvme0n1p1
+            size: 1007K
+          - name: nvme0n1p2
+            size: 1G
+            filesystem: vfat
+            mountpoint: /boot/efi
+          - name: nvme0n1p3
+            size: 118G
+            filesystem: LVM2_member
+    proxmox_storage:
+      - name: backup-hdd
+        type: dir
+        status: active
+        total_kib: 960244192
+        used_kib: 2080
+        available_kib: 960225728
+      - name: cold-archive
+        type: dir
+        status: active
+        total_kib: 1111917400
+        used_kib: 6276
+        available_kib: 1111861972
+      - name: local
+        type: dir
+        status: active
+        total_kib: 40453376
+        used_kib: 4832188
+        available_kib: 33534072
+      - name: local-lvm
+        type: lvmthin
+        status: active
+        total_kib: 56487936
+        used_kib: 0
+        available_kib: 56487936
+      - name: mini-sata
+        type: lvmthin
+        status: active
+        total_kib: 229609472
+        used_kib: 0
+        available_kib: 229609472
     verification:
-      status: unverified
-      source: ../docs/legacy/architecture-v1.drawio
+      status: verified
+      method: Ansible over SSH through Tailscale (lsblk and pvesm status)
+      verified_at: "2026-09-24"
 
-  pve02:
-    disks:
-      - label: reported local disk
-        size_gb: 256
-        reported_use: Proxmox OS and local VM storage
-    pools: []
+  pve-station:
+    devices:
+      - name: sda
+        size: 3.6T
+        partitions:
+          - name: sda1
+            size: 16M
+          - name: sda2
+            size: 3.6T
+            filesystem: ntfs
+      - name: sdb
+        size: 3.6T
+        partitions:
+          - name: sdb1
+            size: 1M
+          - name: sdb2
+            size: 15M
+          - name: sdb3
+            size: 3.6T
+            filesystem: ntfs
+      - name: sdc
+        size: 238.5G
+        partitions:
+          - name: sdc1
+            size: 238.5G
+            filesystem: ntfs
+      - name: sdd
+        size: 465.8G
+        partitions:
+          - name: sdd1
+            size: 1007K
+          - name: sdd2
+            size: 1G
+            filesystem: vfat
+            mountpoint: /boot/efi
+          - name: sdd3
+            size: 464.8G
+            filesystem: LVM2_member
+      - name: nvme0n1
+        size: 238.5G
+        partitions:
+          - name: nvme0n1p1
+            size: 100M
+            filesystem: vfat
+          - name: nvme0n1p2
+            size: 16M
+          - name: nvme0n1p3
+            size: 238.4G
+            filesystem: ntfs
+    proxmox_storage:
+      - name: local
+        type: dir
+        status: active
+        total_kib: 98497780
+        used_kib: 7979292
+        available_kib: 85468940
+      - name: local-lvm
+        type: lvmthin
+        status: active
+        total_kib: 354275328
+        used_kib: 0
+        available_kib: 354275328
     verification:
-      status: unverified
-      source: ../docs/legacy/architecture-v1.drawio
+      status: verified
+      method: Ansible over SSH through Tailscale (lsblk and pvesm status)
+      verified_at: "2026-09-24"

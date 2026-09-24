@@ -1,23 +1,29 @@
-# Reported network details from the v1 diagram. These values have not been
-# checked against the live network.
+# Host interface addresses are live-verified; gateway and topology claims below
+# are retained from the historical diagram and remain unverified.
 lan:
   subnet: 192.168.1.0/24
   gateway:
     address: 192.168.1.1
     reported_name: router-01
+    verification_status: unverified
   topology: flat
   verification:
-    status: unverified
-    source: ../docs/legacy/architecture-v1.drawio
+    status: partially_verified
+    method: Ansible over SSH through Tailscale (ip -br addr)
+    verified_at: "2026-09-24"
 
 management_endpoints:
-  - metal: pve01
-    reported_hostname: pve01-pc
-    lan_ip: 192.168.1.10
-    tailscale_ip: 100.64.1.10
-  - metal: pve02
-    reported_hostname: pve02-mini
-    lan_ip: 192.168.1.11
-    tailscale_ip: 100.64.1.11
+  - metal: pve-mini
+    lan_interface: vmbr0
+    lan_ip: 192.168.1.222/24
+    tailscale_interface: tailscale0
+    tailscale_ip: 100.71.142.105
+    verification_status: verified
+  - metal: pve-station
+    lan_interface: vmbr0
+    lan_ip: 192.168.1.51/24
+    tailscale_interface: tailscale0
+    tailscale_ip: 100.107.148.30
+    verification_status: verified
 
-verification_status: unverified
+verification_status: partially_verified

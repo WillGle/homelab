@@ -47,10 +47,12 @@ does not own the workloads.
 | [diagrams/](diagrams/) | Editable desired-architecture and reported-inventory views. |
 | [docs/legacy/](docs/legacy/) | Preserved v1 records that came from an unverified diagram. |
 
-Inventory records inherited from the old diagram are explicitly marked
-unverified. They are leads for a future live inventory pass, not current-state
-claims. Architecture documents describe intent and do not assert that the
-design has been implemented. No IaC is present yet.
+Core Proxmox host, interface, disk, storage, and guest facts were live-verified
+on 2026-09-24 and are recorded in [STATE.md](STATE.md) and `inventory/`.
+Remaining claims inherited from the old diagram are explicitly marked
+unverified; they are not current-state claims. Architecture documents describe
+intent and do not assert that the design has been implemented. No provisioning
+playbooks or OpenTofu configuration are present yet.
 
 ## Start here
 

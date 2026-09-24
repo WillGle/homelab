@@ -1,39 +1,49 @@
-# Reported physical hardware from the v1 diagram. Nothing in this file has
-# been cross-checked against the live hosts yet.
+# Live Proxmox host facts verified over Ansible/SSH through Tailscale.
 metals:
-  pve01:
-    reported_hostname: pve01-pc
-    hardware:
-      cpu:
-        model: AMD Ryzen 5 5600X
-      memory:
-        capacity_gb: 16
-        type: DDR4
-      gpu:
-        model: RTX 2060 OC (Gigabyte)
-        vram_gb: 6
-    capabilities:
-      cpu_compute: reported
-      gpu_compute: reported
-      memory_capacity_gb: 16
-    verification:
-      status: unverified
-      source: ../docs/legacy/architecture-v1.drawio
-
-  pve02:
-    reported_hostname: pve02-mini
+  pve-mini:
+    hostname: pve-mini
     hardware:
       cpu:
         model: Intel Core i5-6500T
       memory:
-        capacity_gb: 24
-        type: DDR4
-      gpu:
-        status: not_documented
-    capabilities:
-      cpu_compute: reported
-      gpu_compute: not_documented
-      memory_capacity_gb: 24
+        capacity_mb: 23907
+    network:
+      lan:
+        address: 192.168.1.222/24
+        interface: vmbr0
+      tailscale:
+        address: 100.71.142.105
+    software:
+      proxmox_version: "9.2.2"
+      kernel: "7.0.2-6-pve"
+    running_guests:
+      vms: []
+      lxcs: []
     verification:
-      status: unverified
-      source: ../docs/legacy/architecture-v1.drawio
+      status: verified
+      method: Ansible over SSH through Tailscale
+      verified_at: "2026-09-24"
+
+  pve-station:
+    hostname: pve-station
+    hardware:
+      cpu:
+        model: AMD Ryzen 5 5600X
+      memory:
+        capacity_mb: 15915
+    network:
+      lan:
+        address: 192.168.1.51/24
+        interface: vmbr0
+      tailscale:
+        address: 100.107.148.30
+    software:
+      proxmox_version: "9.2.2"
+      kernel: "7.0.2-6-pve"
+    running_guests:
+      vms: []
+      lxcs: []
+    verification:
+      status: verified
+      method: Ansible over SSH through Tailscale
+      verified_at: "2026-09-24"

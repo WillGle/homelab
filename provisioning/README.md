@@ -47,6 +47,6 @@ operational need.
 
 ## Implementation status
 
-- Live inventory: pending verification
+- Core Proxmox host, interface, disk, storage, and guest status: verified 2026-09-24; gateway/topology details remain unverified
 - Manual Proxmox bootstrap: current status unknown
-- Ansible, OpenTofu, and cloud-init: not implemented in this repository
+- Ansible inventory/configuration is present; no playbooks yet. OpenTofu and cloud-init are not implemented.
