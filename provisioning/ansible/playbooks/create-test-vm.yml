@@ -1,5 +1,5 @@
 ---
-- name: Create first cloud-init test VM
+- name: Create and configure first cloud-init test VM
   hosts: pve-mini
   gather_facts: false
 
@@ -25,62 +25,99 @@
     - name: Check whether VM already exists
       ansible.builtin.stat:
         path: "/etc/pve/qemu-server/{{ vm_vmid }}.conf"
-      register: vm_config
+      register: vm_file
 
-    - name: Create VM when absent
-      when: not vm_config.stat.exists
+    - name: Preview Proxmox CLI actions
+      ansible.builtin.debug:
+        msg: >-
+          Check mode does not simulate qm changes. A normal run will clone
+          VMID {{ template_vmid }} if VMID {{ vm_vmid }} is absent, resume
+          missing configuration steps, use DHCP, and start it if stopped.
+      when: ansible_check_mode
+
+    - name: Converge test VM
+      when: not ansible_check_mode
       block:
-
-        - name: Copy controller SSH public key to Proxmox host
-          ansible.builtin.copy:
-            content: "{{ controller_ssh_key }}\n"
-            dest: "{{ remote_ssh_key_file }}"
-            owner: root
-            group: root
-            mode: "0600"
-
-        - name: Clone template
+        - name: Clone template when VM is absent
           ansible.builtin.command:
             cmd: >-
               qm clone {{ template_vmid }} {{ vm_vmid }}
               --name {{ vm_name }}
               --full 1
               --storage {{ vm_storage }}
+          when: not vm_file.stat.exists
 
-        - name: Configure CPU and memory
+        - name: Read current VM configuration
+          ansible.builtin.command:
+            cmd: "qm config {{ vm_vmid }}"
+          register: vm_config
+          changed_when: false
+          check_mode: false
+
+        - name: Ensure VMID belongs to this guest
+          ansible.builtin.assert:
+            that:
+              - "('name: ' ~ vm_name) in vm_config.stdout"
+            fail_msg: "VMID {{ vm_vmid }} exists but is not {{ vm_name }}; refusing to modify it."
+
+        - name: Ensure cloned VM has a boot disk
+          ansible.builtin.assert:
+            that:
+              - "'scsi0:' in vm_config.stdout"
+            fail_msg: "VMID {{ vm_vmid }} has no scsi0 disk; repair or remove the incomplete clone before retrying."
+
+        - name: Configure CPU and memory when needed
           ansible.builtin.command:
             cmd: >-
               qm set {{ vm_vmid }}
               --cores {{ vm_cores }}
               --memory {{ vm_memory }}
+          when: >-
+            ('cores: ' ~ (vm_cores | string)) not in vm_config.stdout or
+            ('memory: ' ~ (vm_memory | string)) not in vm_config.stdout
 
-        - name: Resize VM disk
+        - name: Resize disk when it is not yet the requested size
           ansible.builtin.command:
-            cmd: >-
-              qm resize {{ vm_vmid }}
-              scsi0 {{ vm_disk_size }}
+            cmd: "qm resize {{ vm_vmid }} scsi0 {{ vm_disk_size }}"
+          when:
+            - "'scsi0:' in vm_config.stdout"
+            - (('size=' ~ vm_disk_size) not in vm_config.stdout)
 
-        - name: Configure cloud-init user
+        - name: Copy controller SSH public key when cloud-init needs repair
+          ansible.builtin.copy:
+            content: "{{ controller_ssh_key }}\n"
+            dest: "{{ remote_ssh_key_file }}"
+            owner: root
+            group: root
+            mode: "0600"
+          when: >-
+            ('ciuser: ' ~ cloud_init_user) not in vm_config.stdout or
+            'sshkeys:' not in vm_config.stdout or
+            'ipconfig0: ip=dhcp' not in vm_config.stdout
+
+        - name: Configure cloud-init user, SSH key, and DHCP when needed
           ansible.builtin.command:
             cmd: >-
               qm set {{ vm_vmid }}
               --ciuser {{ cloud_init_user }}
-
-        - name: Inject SSH public key
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ vm_vmid }}
               --sshkeys {{ remote_ssh_key_file }}
-
-        - name: Configure DHCP
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ vm_vmid }}
               --ipconfig0 ip=dhcp
+          when: >-
+            ('ciuser: ' ~ cloud_init_user) not in vm_config.stdout or
+            'sshkeys:' not in vm_config.stdout or
+            'ipconfig0: ip=dhcp' not in vm_config.stdout
 
-        - name: Start VM
+        - name: Read VM status
+          ansible.builtin.command:
+            cmd: "qm status {{ vm_vmid }}"
+          register: vm_status
+          changed_when: false
+          check_mode: false
+
+        - name: Start VM when stopped
           ansible.builtin.command:
             cmd: "qm start {{ vm_vmid }}"
+          when: "'status: running' not in vm_status.stdout"
 
       always:
         - name: Remove temporary SSH public key

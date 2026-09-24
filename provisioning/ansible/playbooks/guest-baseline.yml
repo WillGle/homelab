@@ -2,19 +2,34 @@
 - name: Apply Linux guest baseline
   hosts: linux_guests
   become: true
-  gather_facts: true
+  gather_facts: false
 
   tasks:
+    - name: Wait for the guest to accept SSH connections
+      ansible.builtin.wait_for_connection:
+        connect_timeout: 5
+        sleep: 5
+        timeout: 600
+
     - name: Wait for cloud-init to finish
-      ansible.builtin.command:
-        cmd: cloud-init status --wait
+      ansible.builtin.raw: cloud-init status --wait
       register: cloud_init_status
       changed_when: false
       failed_when: cloud_init_status.rc not in [0, 2]
+      when: not ansible_check_mode
+
+    - name: Explain cloud-init check-mode limitation
+      ansible.builtin.debug:
+        msg: "Check mode does not run 'cloud-init status --wait'; use a normal run after the guest is reachable."
+      when: ansible_check_mode
+
+    - name: Gather facts after cloud-init
+      ansible.builtin.setup:
 
     - name: Show cloud-init status
       ansible.builtin.debug:
         var: cloud_init_status.stdout
+      when: not ansible_check_mode
 
     - name: Verify Ubuntu guest
       ansible.builtin.assert:

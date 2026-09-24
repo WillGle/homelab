@@ -27,55 +27,100 @@
         dest: "{{ cloud_image_path }}"
         mode: "0644"
 
-    - name: Check whether template already exists
+    - name: Check whether template VMID exists
       ansible.builtin.stat:
         path: "/etc/pve/qemu-server/{{ template_vmid }}.conf"
+      register: template_file
+
+    - name: Preview Proxmox CLI actions
+      ansible.builtin.debug:
+        msg: >-
+          Check mode does not simulate qm changes. A normal run will create
+          VMID {{ template_vmid }} if absent, resume missing disk/configuration
+          steps, and convert it to template {{ template_name }}.
+      when: ansible_check_mode
+
+    - name: Create template VM when absent
+      ansible.builtin.command:
+        cmd: >-
+          qm create {{ template_vmid }}
+          --name {{ template_name }}
+          --memory 2048
+          --cores 2
+          --net0 virtio,bridge=vmbr0
+      when:
+        - not ansible_check_mode
+        - not template_file.stat.exists
+
+    - name: Read current template configuration
+      ansible.builtin.command:
+        cmd: "qm config {{ template_vmid }}"
       register: template_config
+      changed_when: false
+      check_mode: false
+      when: not ansible_check_mode
 
-    - name: Build template when absent
-      when: not template_config.stat.exists
-      block:
-        - name: Create VM
-          ansible.builtin.command:
-            cmd: >-
-              qm create {{ template_vmid }}
-              --name {{ template_name }}
-              --memory 2048
-              --cores 2
-              --net0 virtio,bridge=vmbr0
+    - name: Ensure VMID belongs to this template
+      ansible.builtin.assert:
+        that:
+          - "('name: ' ~ template_name) in template_config.stdout"
+        fail_msg: "VMID {{ template_vmid }} exists but is not {{ template_name }}; refusing to modify it."
+      when: not ansible_check_mode
 
-        - name: Import cloud image
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ template_vmid }}
-              --scsihw virtio-scsi-pci
-              --scsi0 {{ template_storage }}:0,import-from={{ cloud_image_path }}
+    - name: Import cloud image when disk is absent
+      ansible.builtin.command:
+        cmd: >-
+          qm set {{ template_vmid }}
+          --scsihw virtio-scsi-pci
+          --scsi0 {{ template_storage }}:0,import-from={{ cloud_image_path }}
+      when:
+        - not ansible_check_mode
+        - "'template: 1' not in template_config.stdout"
+        - "'scsi0:' not in template_config.stdout"
 
-        - name: Add cloud-init drive
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ template_vmid }}
-              --ide2 {{ template_storage }}:cloudinit
+    - name: Configure cloud-init and boot options when incomplete
+      ansible.builtin.command:
+        cmd: >-
+          qm set {{ template_vmid }}
+          --scsihw virtio-scsi-pci
+          --ide2 {{ template_storage }}:cloudinit
+          --boot order=scsi0
+          --serial0 socket
+          --vga serial0
+          --agent enabled=1
+      when:
+        - not ansible_check_mode
+        - "'template: 1' not in template_config.stdout"
+        - >-
+          not (
+            'scsihw: virtio-scsi-pci' in template_config.stdout and
+            ('ide2: ' ~ template_storage ~ ':') in template_config.stdout and
+            'boot: order=scsi0' in template_config.stdout and
+            'serial0: socket' in template_config.stdout and
+            'vga: serial0' in template_config.stdout and
+            'agent: enabled=1' in template_config.stdout
+          )
 
-        - name: Configure boot disk
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ template_vmid }}
-              --boot order=scsi0
+    - name: Convert VM to template when needed
+      ansible.builtin.command:
+        cmd: "qm template {{ template_vmid }}"
+      when:
+        - not ansible_check_mode
+        - "'template: 1' not in template_config.stdout"
 
-        - name: Enable serial console
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ template_vmid }}
-              --serial0 socket
-              --vga serial0
+    - name: Verify resulting template
+      ansible.builtin.command:
+        cmd: "qm config {{ template_vmid }}"
+      register: verified_template
+      changed_when: false
+      check_mode: false
+      when: not ansible_check_mode
 
-        - name: Enable guest agent support
-          ansible.builtin.command:
-            cmd: >-
-              qm set {{ template_vmid }}
-              --agent enabled=1
-
-        - name: Convert VM to template
-          ansible.builtin.command:
-            cmd: "qm template {{ template_vmid }}"
+    - name: Assert template conversion completed
+      ansible.builtin.assert:
+        that:
+          - "'template: 1' in verified_template.stdout"
+          - "('name: ' ~ template_name) in verified_template.stdout"
+          - "'scsi0:' in verified_template.stdout"
+          - "'ide2:' in verified_template.stdout"
+      when: not ansible_check_mode
