@@ -1,0 +1,81 @@
+---
+- name: Build Ubuntu 24.04 cloud-init template
+  hosts: pve-mini
+  gather_facts: false
+
+  vars:
+    template_vmid: 9000
+    template_name: ubuntu-2404-cloud
+    template_storage: mini-sata
+
+    cloud_image_url: >-
+      https://cloud-images.ubuntu.com/releases/server/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img
+
+    cloud_image_path: >-
+      /var/lib/vz/template/iso/ubuntu-24.04-server-cloudimg-amd64.img
+
+  tasks:
+    - name: Ensure ISO directory exists
+      ansible.builtin.file:
+        path: /var/lib/vz/template/iso
+        state: directory
+        mode: "0755"
+
+    - name: Download Ubuntu cloud image
+      ansible.builtin.get_url:
+        url: "{{ cloud_image_url }}"
+        dest: "{{ cloud_image_path }}"
+        mode: "0644"
+
+    - name: Check whether template already exists
+      ansible.builtin.stat:
+        path: "/etc/pve/qemu-server/{{ template_vmid }}.conf"
+      register: template_config
+
+    - name: Build template when absent
+      when: not template_config.stat.exists
+      block:
+        - name: Create VM
+          ansible.builtin.command:
+            cmd: >-
+              qm create {{ template_vmid }}
+              --name {{ template_name }}
+              --memory 2048
+              --cores 2
+              --net0 virtio,bridge=vmbr0
+
+        - name: Import cloud image
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ template_vmid }}
+              --scsihw virtio-scsi-pci
+              --scsi0 {{ template_storage }}:0,import-from={{ cloud_image_path }}
+
+        - name: Add cloud-init drive
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ template_vmid }}
+              --ide2 {{ template_storage }}:cloudinit
+
+        - name: Configure boot disk
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ template_vmid }}
+              --boot order=scsi0
+
+        - name: Enable serial console
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ template_vmid }}
+              --serial0 socket
+              --vga serial0
+
+        - name: Enable guest agent support
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ template_vmid }}
+              --agent enabled=1
+
+        - name: Convert VM to template
+          ansible.builtin.command:
+            cmd: "qm template {{ template_vmid }}"

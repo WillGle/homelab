@@ -1,0 +1,39 @@
+---
+- name: Apply Linux guest baseline
+  hosts: linux_guests
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Wait for cloud-init to finish
+      ansible.builtin.command:
+        cmd: cloud-init status --wait
+      register: cloud_init_status
+      changed_when: false
+      failed_when: cloud_init_status.rc not in [0, 2]
+
+    - name: Show cloud-init status
+      ansible.builtin.debug:
+        var: cloud_init_status.stdout
+
+    - name: Verify Ubuntu guest
+      ansible.builtin.assert:
+        that:
+          - ansible_facts["distribution"] == "Ubuntu"
+        fail_msg: "Expected an Ubuntu guest"
+
+    - name: Install guest baseline packages
+      ansible.builtin.apt:
+        name:
+          - qemu-guest-agent
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Start QEMU guest agent
+      ansible.builtin.service:
+        name: qemu-guest-agent
+        state: started
+        enabled: true

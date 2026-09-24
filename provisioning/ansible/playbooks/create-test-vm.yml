@@ -1,0 +1,89 @@
+---
+- name: Create first cloud-init test VM
+  hosts: pve-mini
+  gather_facts: false
+
+  vars:
+    template_vmid: 9000
+
+    vm_vmid: 100
+    vm_name: lab-general-01
+
+    vm_storage: mini-sata
+    vm_memory: 2048
+    vm_cores: 2
+    vm_disk_size: 20G
+
+    cloud_init_user: will
+
+    controller_ssh_key: >-
+      {{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_ed25519.pub') }}
+
+    remote_ssh_key_file: /tmp/homelab-cloud-init.pub
+
+  tasks:
+    - name: Check whether VM already exists
+      ansible.builtin.stat:
+        path: "/etc/pve/qemu-server/{{ vm_vmid }}.conf"
+      register: vm_config
+
+    - name: Create VM when absent
+      when: not vm_config.stat.exists
+      block:
+
+        - name: Copy controller SSH public key to Proxmox host
+          ansible.builtin.copy:
+            content: "{{ controller_ssh_key }}\n"
+            dest: "{{ remote_ssh_key_file }}"
+            owner: root
+            group: root
+            mode: "0600"
+
+        - name: Clone template
+          ansible.builtin.command:
+            cmd: >-
+              qm clone {{ template_vmid }} {{ vm_vmid }}
+              --name {{ vm_name }}
+              --full 1
+              --storage {{ vm_storage }}
+
+        - name: Configure CPU and memory
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ vm_vmid }}
+              --cores {{ vm_cores }}
+              --memory {{ vm_memory }}
+
+        - name: Resize VM disk
+          ansible.builtin.command:
+            cmd: >-
+              qm resize {{ vm_vmid }}
+              scsi0 {{ vm_disk_size }}
+
+        - name: Configure cloud-init user
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ vm_vmid }}
+              --ciuser {{ cloud_init_user }}
+
+        - name: Inject SSH public key
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ vm_vmid }}
+              --sshkeys {{ remote_ssh_key_file }}
+
+        - name: Configure DHCP
+          ansible.builtin.command:
+            cmd: >-
+              qm set {{ vm_vmid }}
+              --ipconfig0 ip=dhcp
+
+        - name: Start VM
+          ansible.builtin.command:
+            cmd: "qm start {{ vm_vmid }}"
+
+      always:
+        - name: Remove temporary SSH public key
+          ansible.builtin.file:
+            path: "{{ remote_ssh_key_file }}"
+            state: absent
