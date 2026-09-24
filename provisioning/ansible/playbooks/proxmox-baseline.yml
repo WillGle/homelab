@@ -1,0 +1,43 @@
+---
+- name: Apply minimal Proxmox baseline
+  hosts: proxmox
+  gather_facts: true
+
+  tasks:
+    - name: Verify Debian family
+      ansible.builtin.assert:
+        that:
+          - ansible_facts["os_family"] == "Debian"
+        fail_msg: "Expected Debian-based Proxmox host"
+
+    - name: Read Proxmox version
+      ansible.builtin.command:
+        cmd: pveversion
+      register: pve_version
+      changed_when: false
+
+    - name: Show Proxmox version
+      ansible.builtin.debug:
+        var: pve_version.stdout
+
+    - name: Create Homelab management directory
+      ansible.builtin.file:
+        path: /opt/homelab-managed
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write management marker
+      ansible.builtin.copy:
+        dest: /opt/homelab-managed/README
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          Managed by github.com/WillGle/homelab
+
+          Current automation scope:
+          - Ansible connectivity over Tailscale
+          - live host inventory collection
+          - minimal safe baseline
