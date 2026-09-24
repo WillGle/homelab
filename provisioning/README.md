@@ -1,9 +1,10 @@
 # Provisioning Lifecycle
 
 This is the intended sequence from physical machines to generic infrastructure
-capacity. It is a plan; no Ansible, OpenTofu, or cloud-init configuration is
-implemented in this repository yet. The [platform boundary diagram](../diagrams/platform.drawio)
-summarizes the capacity hand-off at the end of this lifecycle.
+capacity. A minimal [Ansible baseline playbook](ansible/playbooks/proxmox-baseline.yml)
+is present; OpenTofu and cloud-init configuration are not implemented yet. The
+[platform boundary diagram](../diagrams/platform.drawio) summarizes the capacity
+hand-off at the end of this lifecycle.
 
 ```text
 Verified inventory
@@ -49,4 +50,4 @@ operational need.
 
 - Core Proxmox host, interface, disk, storage, and guest status: verified 2026-09-24; gateway/topology details remain unverified
 - Manual Proxmox bootstrap: current status unknown
-- Ansible inventory/configuration is present; no playbooks yet. OpenTofu and cloud-init are not implemented.
+- Ansible inventory/configuration and the [Proxmox baseline playbook](ansible/playbooks/proxmox-baseline.yml) are present; OpenTofu and cloud-init are not implemented.

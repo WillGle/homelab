@@ -51,8 +51,9 @@ Core Proxmox host, interface, disk, storage, and guest facts were live-verified
 on 2026-09-24 and are recorded in [STATE.md](STATE.md) and `inventory/`.
 Remaining claims inherited from the old diagram are explicitly marked
 unverified; they are not current-state claims. Architecture documents describe
-intent and do not assert that the design has been implemented. No provisioning
-playbooks or OpenTofu configuration are present yet.
+intent and do not assert that the design has been implemented. A minimal
+[Ansible baseline playbook](provisioning/ansible/playbooks/proxmox-baseline.yml)
+is present; OpenTofu and cloud-init configuration are not implemented yet.
 
 ## Start here
 
