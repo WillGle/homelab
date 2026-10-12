@@ -1024,18 +1024,40 @@ Không đưa SMB/NFS trực tiếp ra Internet.
 
 ---
 
-# 19. Phase 15 — WisdomTree production platform
+# 19. Phase 15 — WisdomTree production platform & Document Lab
 
 WisdomTree thuộc application + knowledge plane.
 
 ```text
-WisdomTree
+WisdomTree & Document Platform
 │
-├── Next.js application
-├── PostgreSQL
-├── object/file storage integration
-└── later pgvector / RAG
+├── Next.js application (Web UI / Note & Synthesis)
+├── PostgreSQL 16 (Foundation metadata & relational store)
+├── Document Processing & Ingestion Worker
+│
+└── Document Toolchain & Publishing Lab (Companion Services)
+    ├── LaTeX Compiler (Tectonic / TeXLive CLI)
+    ├── Document Converter (Pandoc, Stirling-PDF)
+    └── EPUB & Ebook Server (Calibre-Web / OPDS sync to e-readers)
 ```
+
+### Mối quan hệ giữa Document Lab và WisdomTree:
+
+1. **Document Ingestion Pipeline:**
+   - Các file sách EPUB, bài báo khoa học PDF, tài liệu thô được tiếp nhận và xử lý qua Pandoc/Stirling-PDF.
+   - Đầu ra được chuẩn hóa (Markdown/Text) và đẩy thẳng vào kho lưu trữ tài liệu gốc `/data/originals` (trên Tier 3: `cold-archive` MergerFS 1.1TB).
+   - Worker của WisdomTree lập chỉ mục, băm nhỏ (chunking) và bảo toàn tính nguồn gốc (provenance).
+
+2. **Publishing & Scientific Writing:**
+   - Biên dịch báo cáo nghiên cứu, tài liệu kỹ thuật chất lượng cao bằng LaTeX.
+   - Quản lý và đọc sách học tập/nghiên cứu tập trung qua Calibre-Web (hỗ trợ đọc trên trình duyệt hoặc đồng bộ qua Wi-Fi tới máy đọc sách Kindle/Kobo).
+
+3. **Kiến trúc Giao diện & Trải nghiệm (Decoupled Hub & Spoke vs Custom Monolith):**
+   - **Quyết định thiết kế:** Không tự code một ứng dụng nguyên khối (Monolith) ôm đồm toàn bộ việc biên dịch LaTeX hay chỉnh sửa PDF (tránh bẫy phát minh lại bánh xe).
+   - **Mô hình Portal / Launcher:** Tận dụng UI hoàn thiện của các công cụ mã nguồn mở chuyên biệt (Calibre-Web, Stirling-PDF), kết nối thông qua một **Minimal Portal / Dashboard**:
+     - *Phương án A:* Tích hợp menu launcher "Lab Tools" ngay trên Sidebar của WisdomTree (mở tab hoặc iframe chuyển hướng nhanh).
+     - *Phương án B:* Dựng một trang launcher tối giản (ví dụ: `tools.gleworks.io.vn`) hiển thị các card dịch vụ.
+   - **Bảo toàn ranh giới WisdomTree:** Giữ codebase của WisdomTree thuần khiết, tập trung 100% vào việc tổng hợp tri thức, quản lý provenance và Live SLM RAG.
 
 Deployment:
 
@@ -1046,18 +1068,18 @@ CI
  ↓
 container image
  ↓
-Kubernetes
+Node B / Proxmox
  ↓
-WisdomTree
+WisdomTree + Document Services
  ↓
-PostgreSQL + NAS/object storage
+PostgreSQL (Tier 1: NVMe) + Library Storage (Tier 3: MergerFS)
 ```
 
 Platform phải đảm bảo:
 
 - backup database;
-- backup source materials;
-- persistent storage;
+- backup source materials & library;
+- persistent storage (MergerFS / NVMe);
 - monitoring;
 - logs;
 - secrets;
@@ -1065,43 +1087,47 @@ Platform phải đảm bảo:
 
 ---
 
-# 20. Phase 16 — Knowledge / RAG compute
+# 20. Phase 16 — Knowledge / Live Internal RAG (SLM-First)
 
-RAG không phải phase đầu.
-
-Sau khi WisdomTree chạy ổn định:
+RAG không phải phase đầu, nhưng khi triển khai, **ưu tiên chiến lược SLM-First (Small Language Models)** thay vì phụ thuộc vào mô hình khổng lồ.
 
 ```text
-Source
+Source (/data/originals trên Tier 3: MergerFS)
   │
   ▼
-Extraction
+Extraction (Worker / Pandoc / Stirling-PDF)
   │
   ▼
-Chunking
+Chunking (Lưu số trang, vị trí, metadata)
   │
   ▼
-Embedding
+Embedding (bge-m3 / nomic-embed-text)
   │
   ▼
-Vector store
+Vector Store (PostgreSQL 16 + pgvector trên Tier 1: NVMe local-lvm)
   │
   ▼
-Retrieval
+Semantic Retrieval (Top 3-5 chunks liên quan nhất)
   │
   ▼
-Reranking
+Live SLM Inference (Qwen2.5-1.5B/3B, Llama-3.2-3B qua Ollama trên Node B CPU)
   │
   ▼
-LLM
-  │
-  ▼
-Synthesis
+Synthesis & Provenance Citation (Trả lời tức thì, dẫn nguồn [1], [2] chính xác)
 ```
 
-Heavy AI workload có thể chạy trên compute node.
+### Chiến lược RAG Phân tầng (Two-Tier Inference):
 
-WisdomTree vẫn là control plane của knowledge/provenance.
+1. **Tầng 1: Live Interactive SLM (Always-on 24/7 trên Node B):**
+   - **Mô hình:** SLM lượng tử hóa `Q4_K_M` (Qwen2.5-1.5B/3B, Llama-3.2-3B, Phi-3.5-mini).
+   - **Hạ tầng:** Chạy trực tiếp trên **CPU i5-6500T** (qua Ollama/llama.cpp trong LXC 101), tiêu tốn chỉ **1.5GB – 2.5GB RAM**.
+   - **Ưu điểm:** Zero-GPU, phản hồi sub-second (< 1s), online 24/7 để tra cứu nhanh khi đọc sách hoặc ghi chép.
+   - **Vector Store:** Tích hợp trực tiếp **`pgvector`** vào PostgreSQL có sẵn của WisdomTree, lưu trên NVMe siêu tốc.
+
+2. **Tầng 2: Deep Synthesis & Multi-Doc Analysis (Burst Compute trên Node A):**
+   - Khi cần tổng hợp phân tích sâu hàng chục bài báo khoa học, hoặc sinh code simulation phức tạp:
+   - Offload request sang **Node A (RTX 2060 6GB CUDA)** chạy các model lớn hơn (7B–8B, DeepSeek-R1-Distill).
+   - WisdomTree vẫn luôn là **control plane duy nhất** quản lý provenance và knowledge graph.
 
 ---
 
@@ -1357,8 +1383,8 @@ Lúc đó `plank` thực sự trở thành control repo cho platform.
 ## Milestone A — IaC beginner
 
 ```text
-[ ] Terraform local exercise
-[ ] Understand state
+[x] Terraform local exercise (Node B pve-mini)
+[x] Understand state (recon qua data sources & state inspection)
 [ ] Ansible localhost/VM exercise
 [ ] Understand inventory/playbook/role
 [ ] Understand idempotency
@@ -1368,19 +1394,22 @@ Lúc đó `plank` thực sự trở thành control repo cho platform.
 
 ---
 
-## Milestone B — Reproducible VM
+## Milestone B — Reproducible Infrastructure
 
 ```text
-[ ] Proxmox template
+[x] Terraform creates LXC container (app-gateway-01 [100])
+[x] Storage tiering integrated (mini-sata SSD, local-lvm NVMe, cold-archive)
+[x] Initialization & SSH keys work
+[x] SSH ProxyJump via pve-mini works transparently
+[ ] Proxmox VM template
 [ ] Terraform creates VM
 [ ] Terraform destroys VM
 [ ] cloud-init works
-[ ] SSH works
 ```
 
 Kết quả:
 
-> VM không còn là thứ tạo bằng click.
+> Hạ tầng container & VM không còn là thứ tạo bằng click thủ công.
 
 ---
 
@@ -1403,17 +1432,17 @@ Kết quả:
 ## Milestone D — First application platform
 
 ```text
-[ ] Docker runtime
-[ ] reverse proxy
-[ ] test webapp
-[ ] database
-[ ] domain/TLS
+[x] Ingress & reverse proxy (Caddy trong LXC 100)
+[x] Zero-trust ingress (Cloudflare Tunnel pve-mini-gateway)
+[x] Domain & SSL live (gleworks.io.vn, keebs.gleworks.io.vn, wt.gleworks.io.vn)
+[ ] Docker runtime (WisdomTree runtime trong LXC 101)
+[ ] Database (PostgreSQL 16 trên Tier 1 NVMe local-lvm)
 [ ] basic monitoring
 ```
 
 Kết quả:
 
-> Application có một nơi chạy reproducible.
+> Application có một nơi chạy reproducible và an toàn từ internet.
 
 ---
 
@@ -1453,11 +1482,12 @@ Kết quả:
 ## Milestone G — Storage
 
 ```text
+[x] Datastores defined & classified into 5 tiers
 [ ] NAS deployed
 [ ] datasets defined
 [ ] snapshots
 [ ] permissions
-[ ] backup target
+[ ] backup target (VZDump retention on backup-hdd)
 [ ] Kubernetes storage integration
 ```
 
@@ -1470,34 +1500,57 @@ Kết quả:
 ## Milestone H — Real workloads
 
 ```text
-[ ] Gleworks
-[ ] portfolio
-[ ] WisdomTree
+[x] Gleworks / keebs (Vite static live on homelab)
+[x] Frontend CI quality gates (.github/ci.yml)
+[ ] Staging environment (*.staging.gleworks.io.vn)
+[ ] WisdomTree (Next.js 16 + Postgres + Worker)
+[ ] Document Lab & Publishing (LaTeX/Tectonic, Pandoc, Stirling-PDF)
+[ ] EPUB & Ebook Library (Calibre-Web với OPDS sync sang Kindle/Kobo)
 [ ] databases
 [ ] media
 ```
 
 Kết quả:
 
-> Platform bắt đầu phục vụ workload thật.
+> Platform bắt đầu phục vụ workload thật: webapps, ghi chú tri thức, xuất bản và thư viện sách cá nhân.
 
 ---
 
-## Milestone I — Engineering & RAG
+## Milestone I — Engineering & Live RAG (SLM-First)
 
 ```text
-[ ] engineering compute VM
-[ ] scientific toolchain
-[ ] NAS engineering datasets
-[ ] WisdomTree source integration
-[ ] embedding service
-[ ] retrieval
-[ ] local LLM
+[ ] pgvector extension tích hợp trong PostgreSQL 16 (Tier 1: NVMe)
+[ ] Embedding engine (bge-m3 / nomic-embed qua Ollama/FastEmbed)
+[ ] Live SLM inference engine 24/7 (Ollama với Qwen2.5-3B / Llama-3.2 trên Node B CPU)
+[ ] Document pipeline integration: Chuyển đổi EPUB/PDF tự động nạp vào WisdomTree (/data/originals)
+[ ] WisdomTree source integration & citation provenance (trích dẫn [1], [2] từ chunk gốc)
+[ ] Two-tier offload: Điều hướng tác vụ tổng hợp nặng/deep reasoning sang Node A (RTX 2060 GPU)
+[ ] engineering compute VM/container (Node A - Ryzen 5600X + RTX 2060)
+[ ] scientific toolchain (Python, C++, CUDA)
+[ ] NAS engineering datasets (cold-archive MergerFS)
 ```
 
 Kết quả:
 
-> Platform phục vụ cả software lẫn engineering research.
+> Platform phục vụ cả software lẫn live research intelligence với khả năng tra cứu tri thức tức thì 24/7.
+
+---
+
+## Milestone J — Earth Observation, SDR & Computational Engineering
+
+```text
+[ ] RTL-SDR / Radio telemetry ingestion (Proxmox USB Passthrough)
+[ ] Weather satellite reception (NOAA-15/18/19, Meteor-M2 137MHz)
+[ ] ADS-B & Radar tracking pipeline (1090MHz)
+[ ] Southern Vietnam / Mekong Delta climate & flood simulation dataset (NetCDF, GIS, PostGIS)
+[ ] Environmental ML predictive modeling
+[ ] Robotics telemetry, sensors & IoT MQTT broker
+[ ] Computational Aerodynamics / CFD solvers (OpenFOAM / SU2) on Node A
+```
+
+Kết quả:
+
+> Homelab trở thành trạm quan sát trái đất, vô tuyến và phòng thí nghiệm cơ khí/khí động học thực nghiệm.
 
 ---
 
@@ -1779,20 +1832,24 @@ Platform services
 # 33. Trạng thái hiện tại
 
 ```text
-Current
+Current State:
    │
    ▼
-Blank repository
+[x] Node B (pve-mini) Bootstrap Completed:
+   ├── Terraform IaC: Cấp phát thành công LXC 100 (app-gateway-01) trên mini-sata SSD
+   ├── Storage Tiering: Định danh & phân tầng 5 ổ đĩa vật lý (NVMe, SSD, MergerFS, HDD backup)
+   ├── Zero-Trust Ingress: Caddy + Cloudflare Tunnel (pve-mini-gateway) hoạt động 24/7 không mở port
+   ├── Tên miền & SSL Live: gleworks.io.vn, keebs.gleworks.io.vn, wt.gleworks.io.vn
+   ├── Workload đầu tiên: gleworks-keebs production live trực tiếp từ homelab
+   └── DevOps Quality Gates: GitHub Actions CI (.github/ci.yml) tự động test/build
    │
    ▼
-Learn Terraform + Ansible locally
-   │
-   ▼
-Provision first disposable Proxmox VM
+Mục tiêu tức thì kế tiếp (Immediate Next Steps):
+   ├── 1. Khai báo Terraform LXC 101: WisdomTree Fullstack (Next.js 16 SSR + Worker + Postgres trên NVMe Tier 1)
+   ├── 2. Tích hợp Document Lab: Thiết lập công cụ chuyển đổi tài liệu & EPUB Server (LaTeX, Pandoc, Calibre-Web)
+   ├── 3. Khai báo Terraform LXC 102: GitHub Actions Self-Hosted Runner (tự động hóa CD)
+   ├── 4. Cấu hình môi trường Staging (*.staging.gleworks.io.vn) trên Caddy & Cloudflare
+   └── 5. Kích hoạt Node A (Ryzen 5600X + RTX 2060): Chuẩn bị cho CFD (OpenFOAM), SDR & ML simulation
 ```
 
-Đó là nơi roadmap này bắt đầu.
-
-Không cần giải quyết Kubernetes, NAS, RAG hay observability ngay lúc này.
-
-Chúng đã có vị trí trong blueprint; ta sẽ tiến tới từng lớp khi dependency bên dưới đã đủ vững.
+Hệ thống đã vượt qua giai đoạn "Blank repository" ban đầu và chính thức bước vào giai đoạn **vận hành workload thật trên hạ tầng tự quản (Homelab)**.
