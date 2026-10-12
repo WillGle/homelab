@@ -1,0 +1,11 @@
+# Proxmox Node Web GUI Endpoint
+proxmox_endpoint = "https://192.168.1.50:8006/"
+
+# Proxmox API Token (Format: user@realm!tokenid=secret-uuid)
+proxmox_api_token = "terraform-prov@pve!tf-token=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Set true if using Proxmox default self-signed SSL certificate
+proxmox_insecure = true
+
+# Your SSH Public Key to inject into containers/VMs for direct access
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... your-key-label"
