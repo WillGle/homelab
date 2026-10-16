@@ -1,0 +1,22 @@
+---
+- name: Chuẩn hóa Baseline OS cho toàn bộ LXC Container
+  hosts: all
+  tasks:
+    - name: 1. Đồng bộ múi giờ sang Asia/Ho_Chi_Minh
+      community.general.timezone:
+        name: Asia/Ho_Chi_Minh
+
+    - name: 2. Cập nhật apt cache và cài đặt các tiện ích cơ bản
+      ansible.builtin.apt:
+        name:
+          - curl
+          - wget
+          - git
+          - rsync
+          - htop
+          - vim
+          - ca-certificates
+          - gnupg
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
