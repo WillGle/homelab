@@ -906,42 +906,48 @@ Khi tới đây mới thiết kế kỹ VLAN / DMZ / IoT segmentation nếu cầ
 
 # 16. Phase 12 — Observability
 
-Không bắt đầu bằng Grafana dashboard.
+Không bắt đầu bằng Grafana dashboard rực rỡ.
 
 Bắt đầu từ câu hỏi:
 
-> Nếu application chết, mình biết bằng cách nào?
+> Nếu application hoặc ổ đĩa chết, mình biết bằng cách nào và trong bao lâu?
 
-Stack mục tiêu:
+### Triết lý lựa chọn công nghệ: Tự chủ (Self-Hosted) vs SaaS (Datadog)
+
+* **Quyết định về Datadog:** **Không sử dụng làm stack chính**.
+  * *Lý do:* Free tier chỉ lưu trữ metrics 1 ngày (1-day retention), thiếu alerting nâng cao, chi phí bản quyền đắt đỏ, và gửi dữ liệu tài liệu nội bộ lên cloud (vi phạm tính tự chủ dữ liệu).
+* **Quyết định về LGTM Stack (Grafana Labs):** Sử dụng chuẩn mở CNCF theo lộ trình tinh gọn (*Lean Observability*), lưu trữ trên Tier 2 (`mini-sata` SSD):
+  * **Pha 1 (Cốt lõi - dưới 800MB RAM):** `Prometheus` (Metrics) + `Grafana` (Dashboard) + `Alertmanager` (Cảnh báo qua Telegram/Discord bot).
+  * **Pha 2 (Logs):** `Loki` (Gom log từ Caddy và Docker container, retention 7–14 ngày).
+  * **Pha 3 (Tracing - Tạm hoãn):** `Tempo` hoãn lại cho tới khi có Kubernetes và nhiều microservices; không triển khai cho kiến trúc monolith/modular hiện tại để tránh lãng phí RAM/CPU.
+
+### Kiến trúc phân tầng quan trắc hiện tại
 
 ```text
-              applications
-                   │
-        ┌──────────┼──────────┐
-        │          │          │
-     metrics      logs      health
-        │          │          │
-        ▼          ▼          ▼
-   Prometheus   logging     probes
-        │          │
-        └────┬─────┘
-             ▼
-           Grafana
+               applications & host
+                        │
+         ┌──────────────┼──────────────┐
+         │              │              │
+      metrics          logs          health
+   (9100 / 9633)        │              │
+         │              │              ▼
+         ▼              ▼            probes
+    Prometheus        Loki        (Caddy/HTTP)
+         │              │
+         ├──────────────┴──────┬───────────────┐
+         ▼                     ▼               ▼
+      Grafana            Alertmanager     (Tempo - pha sau)
+   (Trực quan)        (Telegram/Discord)    (Microservices)
 ```
 
-## Thứ tự
+### Hiện trạng triển khai
 
-1. node metrics;
-2. application health;
-3. Prometheus;
-4. Grafana;
-5. centralized logs;
-6. alerting;
-7. Elasticsearch/OpenSearch chỉ khi thật sự cần.
+1. **Host Exporters (Đã chạy 24/7 trên `pve-mini`):**
+   * `prometheus-node-exporter` (Port `9100`): CPU, RAM, Disk I/O, Network.
+   * `prometheus-smartctl-exporter` (Port `9633`): Sức khỏe SMART, nhiệt độ, lỗi bad sector của cả 5 ổ đĩa.
+2. **TSDB & Dashboards (Sắp tới):**
+   * Đặt Prometheus TSDB & Loki chunks trên **Tier 2 (`mini-sata` SATA SSD 219GB)** để chịu tải ghi liên tục mà không hao mòn NVMe Tier 1.
 
-Không triển khai Elastic chỉ vì nó phổ biến.
-
-Nó có chi phí RAM/CPU/storage đáng kể.
 
 ---
 
@@ -1435,8 +1441,8 @@ Kết quả:
 [x] Ingress & reverse proxy (Caddy trong LXC 100)
 [x] Zero-trust ingress (Cloudflare Tunnel pve-mini-gateway)
 [x] Domain & SSL live (gleworks.io.vn, keebs.gleworks.io.vn, wt.gleworks.io.vn)
-[ ] Docker runtime (WisdomTree runtime trong LXC 101)
-[ ] Database (PostgreSQL 16 trên Tier 1 NVMe local-lvm)
+[x] Docker runtime (WisdomTree runtime trong LXC 101)
+[x] Database (PostgreSQL 16 trên Tier 1 NVMe local-lvm)
 [ ] basic monitoring
 ```
 
@@ -1465,17 +1471,17 @@ Kết quả:
 ## Milestone F — Observability
 
 ```text
-[ ] host metrics
-[ ] Kubernetes metrics
-[ ] app metrics
-[ ] Grafana
-[ ] centralized logs
-[ ] alerts
+[x] host metrics exporters active on pve-mini (node-exporter:9100, smartctl-exporter:9633)
+[ ] Lean Observability Core: Prometheus TSDB trên Tier 2 mini-sata SSD (< 800MB RAM)
+[ ] Dashboards: Grafana (Linux host, LVM-thin storage, Docker, SMART metrics)
+[ ] Alerting: Alertmanager với Telegram/Discord bot cảnh báo (Disk > 90%, OOM, Host down)
+[ ] Centralized logs: Grafana Loki (tập trung log Caddy access & Docker containers)
+[ ] Distributed Tracing: Tempo (hoãn lại đến giai đoạn Kubernetes / Microservices)
 ```
 
 Kết quả:
 
-> Không cần SSH vào từng server để đoán lỗi.
+> Toàn bộ chỉ số phần cứng, sức khỏe 5 ổ đĩa, và lỗi container được cảnh báo tự động về điện thoại mà không cần SSH đoán lỗi.
 
 ---
 
@@ -1503,10 +1509,10 @@ Kết quả:
 [x] Gleworks / keebs (Vite static live on homelab)
 [x] Frontend CI quality gates (.github/ci.yml)
 [ ] Staging environment (*.staging.gleworks.io.vn)
-[ ] WisdomTree (Next.js 16 + Postgres + Worker)
+[x] WisdomTree (Next.js 16 + Postgres 16 trên NVMe + Worker live trên https://wt.gleworks.io.vn)
 [ ] Document Lab & Publishing (LaTeX/Tectonic, Pandoc, Stirling-PDF)
 [ ] EPUB & Ebook Library (Calibre-Web với OPDS sync sang Kindle/Kobo)
-[ ] databases
+[x] databases (Postgres 16 + pgvector trên Tier 1 NVMe)
 [ ] media
 ```
 
@@ -1835,21 +1841,31 @@ Platform services
 Current State:
    │
    ▼
-[x] Node B (pve-mini) Bootstrap Completed:
-   ├── Terraform IaC: Cấp phát thành công LXC 100 (app-gateway-01) trên mini-sata SSD
-   ├── Storage Tiering: Định danh & phân tầng 5 ổ đĩa vật lý (NVMe, SSD, MergerFS, HDD backup)
-   ├── Zero-Trust Ingress: Caddy + Cloudflare Tunnel (pve-mini-gateway) hoạt động 24/7 không mở port
+[x] Node B (pve-mini — 24GB RAM, i5-6500T) Bootstrap & Provisioning Completed:
+   ├── Terraform IaC: Cấp phát thành công toàn bộ 6 LXC Containers (Chỉ tốn ~2.3GB / 24GB RAM):
+   │   ├── LXC 100 (app-gateway-01 — 192.168.1.63): Caddy + Cloudflare Tunnel (Live 24/7 không mở port)
+   │   ├── LXC 101 (research-hub-01 — 192.168.1.252): WisdomTree + SLM RAG + Document Lab
+   │   ├── LXC 102 (ci-runner-01 — 192.168.1.50): GitHub Actions Self-Hosted Runner
+   │   ├── LXC 103 (monitoring-01 — 192.168.1.20): Lean Observability (Prometheus TSDB + Grafana + Alertmanager)
+   │   ├── LXC 104 (media-music-01 — 192.168.1.13): Navidrome Lossless Music Server
+   │   └── LXC 105 (home-automation-01 — 192.168.1.49): Home Assistant & Smarthome Hub
+   ├── Configuration as Code: Ansible tự động cài đặt Docker 29.9.0 & Baseline OS trên toàn bộ các App Node
+   ├── Storage Tiering: Định danh & phân tầng 5 ổ đĩa vật lý (NVMe, SSD, MergerFS 1.1TB, HDD backup)
+   ├── Active Monitoring Exporters: node-exporter (9100) & smartctl-exporter (9633) chạy ngầm 24/7
    ├── Tên miền & SSL Live: gleworks.io.vn, keebs.gleworks.io.vn, wt.gleworks.io.vn
-   ├── Workload đầu tiên: gleworks-keebs production live trực tiếp từ homelab
+   ├── Workloads Production Live:
+   │   ├── gleworks-keebs (Vite static live tại https://keebs.gleworks.io.vn)
+   │   └── WisdomTree Knowledge Hub (Next.js 16 SSR + Postgres 16 trên NVMe + originals trên MergerFS 1.1TB live tại https://wt.gleworks.io.vn)
    └── DevOps Quality Gates: GitHub Actions CI (.github/ci.yml) tự động test/build
    │
    ▼
 Mục tiêu tức thì kế tiếp (Immediate Next Steps):
-   ├── 1. Khai báo Terraform LXC 101: WisdomTree Fullstack (Next.js 16 SSR + Worker + Postgres trên NVMe Tier 1)
-   ├── 2. Tích hợp Document Lab: Thiết lập công cụ chuyển đổi tài liệu & EPUB Server (LaTeX, Pandoc, Calibre-Web)
-   ├── 3. Khai báo Terraform LXC 102: GitHub Actions Self-Hosted Runner (tự động hóa CD)
-   ├── 4. Cấu hình môi trường Staging (*.staging.gleworks.io.vn) trên Caddy & Cloudflare
-   └── 5. Kích hoạt Node A (Ryzen 5600X + RTX 2060): Chuẩn bị cho CFD (OpenFOAM), SDR & ML simulation
+   ├── 1. Khai báo Terraform & Dựng LXC 103 (monitoring-01): Prometheus TSDB + Grafana + Alertmanager trên Tier 2 SSD
+   ├── 2. Triển khai Navidrome trên LXC 104 kết nối kho nhạc lossless MergerFS 1.1TB
+   ├── 3. Khởi chạy Calibre-Web & Stirling-PDF trên LXC 101 kết nối kho sách MergerFS
+   ├── 4. Cấu hình GitHub Actions Runner trên LXC 102 (tự động hóa CD)
+   ├── 5. Cấu hình Home Assistant trên LXC 105 (Zigbee / MQTT)
+   └── 6. Kích hoạt Node A (Ryzen 5600X + RTX 2060): Chuẩn bị cho CFD (OpenFOAM), SDR & ML simulation
 ```
 
-Hệ thống đã vượt qua giai đoạn "Blank repository" ban đầu và chính thức bước vào giai đoạn **vận hành workload thật trên hạ tầng tự quản (Homelab)**.
+Hệ thống đã hoàn tất tầng ảo hóa hạ tầng (IaC) và chính thức bước vào giai đoạn **triển khai workload ứng dụng & hệ thống quan trắc (Observability)**.
