@@ -38,9 +38,14 @@ resource "proxmox_virtual_environment_container" "app_gateway" {
   initialization {
     hostname = "app-gateway-01"
 
+    dns {
+      servers = ["1.1.1.1", "192.168.1.1"]
+    }
+
     ip_config {
       ipv4 {
-        address = "dhcp" # Hoặc IP tĩnh: "192.168.1.100/24", gateway = "192.168.1.1"
+        address = "192.168.1.63/24"
+        gateway = "192.168.1.1"
       }
     }
 
@@ -81,11 +86,6 @@ resource "proxmox_virtual_environment_container" "app_gateway" {
   started = true
 }
 
-output "app_gateway_ip" {
-  description = "IP của Application Gateway Container"
-  value       = proxmox_virtual_environment_container.app_gateway.initialization[0].ip_config[0].ipv4[0].address
-}
-
 resource "proxmox_virtual_environment_container" "research_hub" {
   description  = "WisdomTree, Local SLM RAG, Document Lab - Managed by Terraform"
   node_name    = "pve-mini"
@@ -95,9 +95,14 @@ resource "proxmox_virtual_environment_container" "research_hub" {
   initialization {
     hostname = "research-hub-01"
 
+    dns {
+      servers = ["1.1.1.1", "192.168.1.1"]
+    }
+
     ip_config {
       ipv4 {
-        address = "dhcp" # Hoặc IP tĩnh nếu muốn cố định: "192.168.1.64/24", gateway = "192.168.1.1"
+        address = "192.168.1.252/24"
+        gateway = "192.168.1.1"
       }
     }
 
@@ -118,6 +123,17 @@ resource "proxmox_virtual_environment_container" "research_hub" {
   disk {
     datastore_id = local.storage_tiers.tier2_apps # mini-sata SSD
     size         = 25                             # 25 GB cho Docker images, tools
+  }
+
+  # 1. Ổ riêng 15GB trên Tier 1 NVMe (local-lvm) dành cho PostgreSQL + pgvector
+  mount_point {
+    volume = local.storage_tiers.tier1_database # "local-lvm"
+    size   = "15G"
+    path   = "/mnt/nvme-postgres"
+  }
+
+  lifecycle {
+    ignore_changes = [mount_point]
   }
 
   operating_system {
@@ -239,12 +255,15 @@ resource "proxmox_virtual_environment_container" "monitoring" {
   started = true
 }
 
-
 resource "proxmox_virtual_environment_container" "media_music" {
   description  = "Navidrome Music Server - Managed by Terraform"
   node_name    = "pve-mini"
   vm_id        = 104
   unprivileged = true
+
+  lifecycle {
+    ignore_changes = [mount_point]
+  }
 
   initialization {
     hostname = "media-music-01"
@@ -286,6 +305,57 @@ resource "proxmox_virtual_environment_container" "media_music" {
 
   features {
     nesting = true
+  }
+
+  started = true
+}
+
+resource "proxmox_virtual_environment_container" "home_assistant" {
+  description  = "Home Assistant & Smarthome Hub - Managed by Terraform"
+  node_name    = "pve-mini"
+  vm_id        = 105
+  unprivileged = true
+
+  initialization {
+    hostname = "home-automation-01"
+
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+
+    user_account {
+      keys = [trimspace(var.ssh_public_key)]
+    }
+  }
+
+  cpu {
+    cores = 2
+  }
+
+  memory {
+    dedicated = 2048 # 2GB RAM (đủ chạy mượt HA Core + Mosquitto MQTT + Zigbee2MQTT)
+    swap      = 1024
+  }
+
+  disk {
+    datastore_id = local.storage_tiers.tier2_apps # mini-sata SATA SSD
+    size         = 16                             # 16 GB
+  }
+
+  operating_system {
+    template_file_id = proxmox_virtual_environment_download_file.debian_template.id
+    type             = "debian"
+  }
+
+  network_interface {
+    name   = "eth0"
+    bridge = "vmbr0"
+  }
+
+  features {
+    nesting = true # BẮT BUỘC: để chạy Docker bên trong LXC
   }
 
   started = true
